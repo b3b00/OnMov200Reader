@@ -136,10 +136,10 @@ namespace ByteReader
             var result = new Dictionary<string, object>();
             foreach (var reader in Readers)
             {
-                long position = stream.Position;
-                    Console.Write($"{reader.name} @{position}");
+                // long position = stream.Position;
+                //     Console.Write($"{reader.name} @{position}");
                 var value = reader.reader(stream);
-                Console.WriteLine($" :: {value}");
+                // Console.WriteLine($" :: {value}");
                 result[reader.name] = value;
             }
 

@@ -11,7 +11,9 @@ namespace onmov200
             {
                 using (var writer = new StreamWriter(stream))
                 {
-                    writer.WriteLine(@"<gpx creator=""olivier"" version=""1.0"">
+                    writer.WriteLine(@"
+<?xml version=""1.0"" encoding=""utf-8""?>
+<gpx creator=""olivier"" version=""1.0"">
 <trk>
 <trkseg>");
                     foreach (var wayPoint in wayPoints)

@@ -12,6 +12,8 @@ namespace onmov200
 
         private const int CURVE_DATA_ID = 0xF2;
 
+        private const int CHUNK_SIZE = 20;
+
         private Dictionary<int, Schema> Schemas = new Dictionary<int, Schema>()
         {
             {GPS_DATA_ID, OnMov200Schemas.OMD_GPS},
@@ -28,7 +30,7 @@ namespace onmov200
         public List<WayPoint> Parse(Stream stream)
         {
             long length = stream.Length;
-            long frameCount = length / 20;
+            long frameCount = length / CHUNK_SIZE;
 
             List<WayPoint> points = new List<WayPoint>();
             List<Curve> curves = new List<Curve>();
@@ -36,7 +38,7 @@ namespace onmov200
             
             for (int i = 0; i < frameCount; i++)
             {
-                long dataIdPosition = i * 20 + 19;
+                long dataIdPosition = i * CHUNK_SIZE + (CHUNK_SIZE-1);
                 long currentPosition = stream.Position;
                 stream.Position = dataIdPosition;
                 int dataId = stream.ReadByte();

@@ -6,7 +6,7 @@ using onmov200.gpx;
 using onmov200.model;
 
 
-namespace porgram
+namespace program
 {
     class Program
     {
@@ -22,16 +22,10 @@ namespace porgram
 
             string root = args[0];
 
-            var files = Directory.GetFiles(root, "*.OMD");
-            ;
+            ActivityExtractor.PrintSummary(root);
             
-
-            foreach (var file in files)
-            {
-                FileInfo info = new FileInfo(file);
-                string activity = info.Name.Replace(".OMD", "");
-                ExtractActivity(root, activity);
-            }
+            ActivityExtractor.ExtractAll(root);
+            
             
             
             
@@ -39,36 +33,6 @@ namespace porgram
             ;
         }
 
-        private static void ExtractActivity(string root, string activity)
-        {
-            Console.WriteLine("______________________________");
-            Console.WriteLine("___ OMH                    ___");
-            Console.WriteLine("______________________________");
-
-            var stream = File.Open($@"{root}\{activity}.OMH", FileMode.Open);
-            var omh = OnMov200Schemas.OMH.Read(stream);
-            var header = new ActivityHeader(omh);
-
-            
-
-            Console.WriteLine("______________________________");
-            Console.WriteLine("___ OMD                    ___");
-            Console.WriteLine("______________________________");
-
-            stream = File.Open($@"{root}\{activity}.OMD", FileMode.Open);
-            OMDParser parser = new OMDParser();
-            try
-            {
-                var datas = parser.Parse(stream, header.DateTime);
-                if (datas != null && datas.Any())
-                {
-                    GpxSerializer.Serialize(datas, $"./{activity}.gpx");
-                }
-            }
-            catch (Exception e)
-            {
-                ;
-            }
-        }
+       
     }
 }

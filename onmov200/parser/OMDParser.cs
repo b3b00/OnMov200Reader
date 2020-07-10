@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ByteReader;
+using onmov200.model;
 
-namespace onmov200
+namespace onmov200.parser
 {
     public class OMDParser
     {

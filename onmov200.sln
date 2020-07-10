@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "onmov200", "onmov200\onmov2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteReader", "ByteReader\ByteReader.csproj", "{88CA8F4D-22B1-4D03-AC2E-D06DDEA3A4B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Program", "Program\Program.csproj", "{9B732C45-54F0-4B9D-8263-3AB952C70B07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{88CA8F4D-22B1-4D03-AC2E-D06DDEA3A4B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88CA8F4D-22B1-4D03-AC2E-D06DDEA3A4B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88CA8F4D-22B1-4D03-AC2E-D06DDEA3A4B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B732C45-54F0-4B9D-8263-3AB952C70B07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B732C45-54F0-4B9D-8263-3AB952C70B07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B732C45-54F0-4B9D-8263-3AB952C70B07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B732C45-54F0-4B9D-8263-3AB952C70B07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

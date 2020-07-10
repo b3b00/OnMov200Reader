@@ -1,4 +1,4 @@
-namespace onmov200
+namespace onmov200.model
 {
     public class Curve
     {

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
+using onmov200.model;
 
-namespace onmov200
+
+namespace onmov200.gpx
 {
     public class GpxSerializer
     {

@@ -1,6 +1,6 @@
 using ByteReader;
 
-namespace onmov200
+namespace onmov200.parser
 {
     public class OnMov200Schemas
     {

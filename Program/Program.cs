@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using onmov200.parser;
 using onmov200.gpx;
+using onmov200.model;
 
 
 namespace porgram
@@ -46,13 +47,9 @@ namespace porgram
 
             var stream = File.Open($@"{root}\{activity}.OMH", FileMode.Open);
             var omh = OnMov200Schemas.OMH.Read(stream);
-            foreach (var r in omh)
-            {
-                Console.WriteLine($"{r.Key} : {r.Value}");
-            }
+            var header = new ActivityHeader(omh);
 
-            DateTime startTime = new DateTime(2000 + (int) omh["year"], (int) omh["month"], (int) omh["day"],
-                (int) omh["hour"], (int) omh["min"], 0);
+            
 
             Console.WriteLine("______________________________");
             Console.WriteLine("___ OMD                    ___");
@@ -62,7 +59,7 @@ namespace porgram
             OMDParser parser = new OMDParser();
             try
             {
-                var datas = parser.Parse(stream, startTime);
+                var datas = parser.Parse(stream, header.DateTime);
                 if (datas != null && datas.Any())
                 {
                     GpxSerializer.Serialize(datas, $"./{activity}.gpx");

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,14 +29,12 @@ namespace onmov200.parser
 
         
         
-        public List<WayPoint> Parse(Stream stream)
+        public List<WayPoint> Parse(Stream stream, DateTime startTime)
         {
             long length = stream.Length;
             long frameCount = length / CHUNK_SIZE;
 
             List<WayPoint> points = new List<WayPoint>();
-            List<Curve> curves = new List<Curve>();
-            
             
             for (int i = 0; i < frameCount; i++)
             {
@@ -50,17 +49,24 @@ namespace onmov200.parser
                 var data = schema.Read(stream);
                 if (dataId == GPS_DATA_ID)
                 {
-                    var wp = new WayPoint((double) data["latitude"], (double) data["longitude"]);
+                    var wp = new WayPoint(data);
                     points.Add(wp);
                 }
                 else
                 {
-                    Curve curve = new Curve((int) data["hr"], (int) data["hr2"]);
-                    curves.Add(curve);
+                    int hr1 = (int) data["hr"];
+                    int hr2 = (int) data["hr2"];
+                    int sw1 = (int) data["stopwatch"];
+                    int sw2 = (int) data["stopwatch2"];
                     
                     // todo set HR to last 2 points
-                    points.Last().HR = curve.HR2;
-                    points[^2].HR = curve.HR1;
+                    points.Last().HR = hr2;
+                    DateTime time2 = startTime.AddSeconds(sw2);
+                    points.Last().Time = time2;
+                    
+                    DateTime time1 = startTime.AddSeconds(sw1);
+                    points[^2].Time = time1;
+                    points[^2].HR = hr1;
 
                 }
             }

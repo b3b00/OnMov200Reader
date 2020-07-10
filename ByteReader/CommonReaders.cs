@@ -43,12 +43,6 @@ namespace ByteReader
             return Int;
         }
         
-        public static  object ReadGPS(Stream stream)
-        {
-            int value = (int)ReadInt4(stream);
-            return value / 1000000.0d;
-        }
-        
         public static  object ReadInt1(Stream stream)
         {
             byte[] buffer = new byte[1];

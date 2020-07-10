@@ -24,12 +24,6 @@ namespace ByteReader
             return this;
         }
         
-        public Schema AddLongGPS(string name)
-        {
-            Readers.Add((name,CommonReaders.ReadGPS));
-            return this;
-        }
-        
         public Schema AddInt(string name)
         {
             Readers.Add((name,CommonReaders.ReadInt2));

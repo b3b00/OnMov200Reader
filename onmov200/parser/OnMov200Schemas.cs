@@ -45,8 +45,8 @@ namespace onmov200.parser
                     .AddByte("activityId2")
                     .AddByte("dataId");
 
-            OMD_GPS.AddLongGPS("latitude") //0
-                .AddLongGPS("longitude") //4
+            OMD_GPS.AddLong("latitude") //0
+                .AddLong("longitude") //4
                 .AddLong("distance") //8 
                 .AddInt("stopwatch") //12
                 .AddByte("gpsStatus") // 14

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using ByteReader;
+using onmov200.parser;
+using onmov200.gpx;
+
 
 namespace porgram
 {
@@ -10,18 +12,14 @@ namespace porgram
         
         static void Main(string[] args)
         {
-            var t = CommonReaders.ToFloat(new byte[] {0x64, 0x00, 0x00, 0x00});
-            ;
-            
-            
             
             Console.WriteLine("______________________________");
             Console.WriteLine("___ USER                ___");
             Console.WriteLine("______________________________");
             
             Stream stream = File.Open(@"C:\Users\olduh\Desktop\perso\onmov200\USER.BIN",FileMode.Open);
-            var result = OnMov200Schemas.USER.Read(stream);
-            foreach (var r in result)
+            var user = OnMov200Schemas.USER.Read(stream);
+            foreach (var r in user)
             {
                 Console.WriteLine($"{r.Key} : {r.Value}");
             }
@@ -32,11 +30,14 @@ namespace porgram
             Console.WriteLine("______________________________");
             
             stream = File.Open(@"C:\Users\olduh\Desktop\perso\onmov200\DATA\ACT_0003.OMH",FileMode.Open);
-            result = OnMov200Schemas.OMH.Read(stream);
-            foreach (var r in result)
+            var omh = OnMov200Schemas.OMH.Read(stream);
+            foreach (var r in omh)
             {
                 Console.WriteLine($"{r.Key} : {r.Value}");
             }
+
+            DateTime startTime = new DateTime(2000+(int) omh["year"], (int) omh["month"], (int) omh["day"],
+                (int) omh["hour"], (int) omh["min"],0);
             
             Console.WriteLine("______________________________");
             Console.WriteLine("___ OMD                    ___");
@@ -46,7 +47,8 @@ namespace porgram
             OMDParser parser = new OMDParser();
             try
             {
-                var datas = parser.Parse(stream);
+                
+                var datas = parser.Parse(stream, startTime);
                 if (datas != null && datas.Any())
                 {
                     GpxSerializer.Serialize(datas,"./gpx.gpx");

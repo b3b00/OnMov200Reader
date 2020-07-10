@@ -20,13 +20,26 @@ namespace onmov200.gpx
 <trkseg>");
                     foreach (var wayPoint in wayPoints)
                     {
-                        writer.WriteLine(wayPoint.Xml);
+                        writer.WriteLine(WayPointXML(wayPoint));
                     }
                     writer.WriteLine(@"</trkseg>
 </trk>
 </gpx>");
                 }
             }
+        }
+
+
+        public static string WayPointXML(WayPoint wayPoint)
+        {
+        return  $@"<trkpt lat=""{wayPoint.Latitude.ToString().Replace(",",".")}"" lon=""{wayPoint.Longitude.ToString().Replace(",",".")}"">
+            <extensions>
+                <time>{wayPoint.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffffffK")}</time>
+                <gpxtpx:TrackPointExtension>
+                        <gpxtpx:hr>{wayPoint.HR}</gpxtpx:hr>
+                    </gpxtpx:TrackPointExtension>
+            </extensions>
+        </trkpt>";
         }
     }
 }

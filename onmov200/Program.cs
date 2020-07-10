@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using ByteReader;
 
 namespace onmov200
@@ -36,6 +37,27 @@ namespace onmov200
             {
                 Console.WriteLine($"{r.Key} : {r.Value}");
             }
+            
+            Console.WriteLine("______________________________");
+            Console.WriteLine("___ OMD                    ___");
+            Console.WriteLine("______________________________");
+            
+            stream = File.Open(@"C:\Users\olduh\Desktop\perso\onmov200\DATA\ACT_0003.OMD",FileMode.Open);
+            OMDParser parser = new OMDParser();
+            try
+            {
+                var datas = parser.Parse(stream);
+                if (datas != null && datas.Any())
+                {
+                    GpxSerializer.Serialize(datas,"./gpx.gpx");
+                }
+            }
+            catch (Exception e)
+            {
+                ;
+            }
+
+            ;
         }
     }
 }

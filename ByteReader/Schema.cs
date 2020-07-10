@@ -46,6 +46,12 @@ namespace ByteReader
             return Int;
         }
         
+        public static  object ReadGPS(Stream stream)
+        {
+            int value = (int)ReadInt4(stream);
+            return value / 1000000.0d;
+        }
+        
         public static  object ReadInt1(Stream stream)
         {
             byte[] buffer = new byte[1];
@@ -98,6 +104,11 @@ namespace ByteReader
             return this;
         }
         
+        public Schema AddLongGPS(string name)
+        {
+            Readers.Add((name,CommonReaders.ReadGPS));
+            return this;
+        }
         
         public Schema AddInt(string name)
         {
@@ -124,6 +135,8 @@ namespace ByteReader
             Readers.Add((name,CommonReaders.ReadFloat2));
             return this;
         }
+        
+        
 
         public Schema AddReserved(string name, int length)
         {

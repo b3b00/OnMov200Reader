@@ -1,37 +1,44 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
+using CommandLine;
 using onmov200;
-using onmov200.parser;
-using onmov200.gpx;
-using onmov200.model;
 
 
 namespace program
 {
     class Program
     {
-        
-        static void Main(string[] args)
+        static void Extract(ExtractOptions options)
         {
-            if (args.Length < 1)
-            {
-                Environment.Exit(1);
-            }
-            
-            
-
-            string root = args[0];
-            
-            OnMov200 onMov200 = new OnMov200(root,root); 
+            OnMov200 onMov200 = new OnMov200(options.RootDir, options.OutputDir ?? options.RootDir);
 
             onMov200.PrintSummary();
-            
+
             onMov200.ExtractAll();
+        }
+
+        static void List(ListOptions options)
+        {
+            OnMov200 onMov200 = new OnMov200(options.RootDir, options.RootDir);
+
+            onMov200.PrintSummary();
+        }
+
+        static void FastFix(FastFixOptions options)
+        {
+            OnMov200 onMov200 = new OnMov200(options.RootDir, options.RootDir);
+
+            Console.WriteLine("not yet implemented");
+        }
+
+        static void Main(string[] args)
+        {
+            CommandLine.Parser.Default.ParseArguments<ExtractOptions, ListOptions, FastFixOptions>(args)
+                .WithParsed<ExtractOptions>(options => Extract(options))
+                .WithParsed<ListOptions>(options => List(options))
+                .WithParsed<FastFixOptions>(options => FastFix(options));
+
 
             ;
         }
-
-       
     }
 }

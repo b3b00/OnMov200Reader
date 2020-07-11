@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using onmov200;
 using onmov200.parser;
 using onmov200.gpx;
 using onmov200.model;
@@ -21,14 +22,12 @@ namespace program
             
 
             string root = args[0];
+            
+            OnMov200 onMov200 = new OnMov200(root,root); 
 
-            ActivityExtractor.PrintSummary(root);
+            onMov200.PrintSummary();
             
-            ActivityExtractor.ExtractAll(root);
-            
-            
-            
-            
+            onMov200.ExtractAll();
 
             ;
         }

@@ -26,9 +26,12 @@ namespace onmov200.model
         public int ElevationPlus{ get; set; }
         
         public int ElevationMinus{ get; set; }
+        
+        public string Name { get; set; }
 
-        public ActivityHeader(Dictionary<string, object> data)
+        public ActivityHeader(Dictionary<string, object> data, string name)
         {
+            Name = name;
             Distance = (int) data["distance"];
             DateTime = new DateTime(2000 + (int) data["year"], (int) data["month"], (int) data["day"],
                 (int) data["hour"], (int) data["min"], 0);

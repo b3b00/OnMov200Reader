@@ -18,7 +18,7 @@ namespace avaTodo
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var db = new Database();
+                var db = new Database(@"C:\Users\olduh\Desktop\perso\onmov200");
 
                 desktop.MainWindow = new MainWindow
                 {

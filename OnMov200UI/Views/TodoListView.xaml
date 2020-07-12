@@ -5,17 +5,15 @@
              mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="300"
              x:Class="avaTodo.Views.TodoListView">
   <DockPanel>
-    <Button DockPanel.Dock="Bottom"
-            Command="{Binding $parent[Window].DataContext.AddItem}">
+    <Button DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.AddItem}">
       Add an item
     </Button>
     <ItemsControl Items="{Binding Items}">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <CheckBox Margin="4"
-                    IsChecked="{Binding IsChecked}"
-                    Content="{Binding Description}"
-                    Command="{Binding CheckThis}"                    
+                    IsChecked="{Binding Checked}"
+                    Content="{Binding Label}"             
                     />
         </DataTemplate>
       </ItemsControl.ItemTemplate>

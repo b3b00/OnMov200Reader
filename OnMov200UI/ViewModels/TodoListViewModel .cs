@@ -6,11 +6,11 @@ namespace avaTodo.ViewModels
 {
     public class TodoListViewModel : ViewModelBase
     {
-        public TodoListViewModel(IEnumerable<TodoItem> items)
+        public TodoListViewModel(IEnumerable<ActivityModel> items)
         {
-            Items = new ObservableCollection<TodoItem>(items);
+            Items = new ObservableCollection<ActivityModel>(items);
         }
 
-        public ObservableCollection<TodoItem> Items { get; }
+        public ObservableCollection<ActivityModel> Items { get; }
     }
 }

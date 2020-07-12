@@ -48,7 +48,7 @@ namespace onmov200.model
         {
             int hour = Duration / 3600;
             int min = (Duration % 3600) / 60;
-            return $"{DateTime.ToString("dd/MM/yyyy HH:mm")} {Distance / 1000} km {hour}h{min}m speed:{AverageSpeed}";
+            return $"{DateTime.ToString("dd/MM/yyyy HH:mm")} {Distance / 1000} km {hour}h{min}m {AverageSpeed} km/h";
         }
         
         

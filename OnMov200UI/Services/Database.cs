@@ -2,33 +2,32 @@ using System.Collections.Generic;
 using avaTodo.Models;
 using Newtonsoft.Json;
 using System.IO;
+using System.Linq;
+using onmov200;
 
 namespace avaTodo.Services
 {
     public class Database
     {
+        private OnMov200 OnMov200;
 
-        private List<TodoItem> ToDos = null;
+        public Database(string root)
+        {
+            OnMov200 = new OnMov200(root, root);
+        }
+        
+        private List<ActivityModel> Activities = null;
 
-        public IEnumerable<TodoItem> GetItems()
+        public IEnumerable<ActivityModel> GetItems()
         {
 
-            if (ToDos == null) {
-            string content = File.ReadAllText("./todos.json");
-            ToDos = JsonConvert.DeserializeObject<List<TodoItem>>(content);
-             
+            if (Activities == null)
+            {
+                Activities = OnMov200.GetHeaders().Select(x => new ActivityModel(x)).ToList();
             }
-            return ToDos;
+            return Activities;
         }
 
-        public void RemoveItem(TodoItem todo) {
-            ToDos.Remove(todo);
-            SaveTodos();
-        }
-
-        public void SaveTodos() {
-            string content = JsonConvert.SerializeObject(ToDos);
-            File.WriteAllText("./todos.json", content);
-        }
+        
     }
 }

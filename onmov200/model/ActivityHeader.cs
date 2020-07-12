@@ -44,7 +44,7 @@ namespace onmov200.model
             ElevationMinus = (int) data["D-"];
         }
 
-        public string ToString()
+        public override string ToString()
         {
             int hour = Duration / 3600;
             int min = (Duration % 3600) / 60;

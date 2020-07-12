@@ -11,9 +11,29 @@ namespace program
         {
             OnMov200 onMov200 = new OnMov200(options.RootDir, options.OutputDir ?? options.RootDir);
 
-            onMov200.PrintSummary();
-
-            onMov200.ExtractAll();
+            var activities  = onMov200.GetHeaders();
+            int i = 0;
+            foreach (var activity in activities)
+            {
+                i++;
+                Console.WriteLine($"{i} - {activity}");
+            };
+            string which = Console.ReadLine();
+            int index = -1;
+            if (int.TryParse(which, out index))
+            {
+                if (index >= 1 && index <= activities.Count)
+                {
+                    onMov200.ExtractActivity(activities[index-1]);
+                }
+            }
+            else
+            {
+                if (which == "all")
+                {
+                    onMov200.ExtractAll(activities);
+                }
+            }
         }
 
         static void List(ListOptions options)

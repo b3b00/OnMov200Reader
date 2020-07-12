@@ -74,6 +74,14 @@ namespace onmov200
         }
 
 
+        public void ExtractAll(List<ActivityHeader> activities)
+        {
+            foreach (var activity in activities)
+            {
+                ExtractActivity(activity);
+            }
+        }
+
         public void ExtractAll()
         {
             var files = Directory.GetFiles(DataRoot, "*.OMD");
@@ -104,6 +112,11 @@ namespace onmov200
             FileInfo file = new FileInfo(Path.Combine(DataRoot, omhName + ".OMH"));
 
             return GetHeader(file);
+        }
+
+        public void ExtractActivity(ActivityHeader activity)
+        {
+            ExtractActivity(activity.Name);
         }
 
         public void ExtractActivity(string activity)

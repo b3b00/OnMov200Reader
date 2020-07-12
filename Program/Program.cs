@@ -27,7 +27,7 @@ namespace program
         {
             OnMov200 onMov200 = new OnMov200(options.RootDir, options.RootDir);
 
-            Console.WriteLine("not yet implemented");
+            onMov200.UpDateFastFixIfNeeded();
         }
 
         static void Main(string[] args)

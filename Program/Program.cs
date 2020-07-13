@@ -46,7 +46,7 @@ namespace program
         {
             OnMov200 onMov200 = new OnMov200(options.RootDir, options.RootDir);
 
-            onMov200.UpDateFastFixIfNeeded(options.Force);
+            onMov200.UpDateFastFixIfNeeded(options.Force).GetAwaiter().GetResult();
         }
 
         static void Main(string[] args)

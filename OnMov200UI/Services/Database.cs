@@ -13,7 +13,7 @@ namespace onmov200.Services
 
         public Database(string root)
         {
-            OnMov200 = new OnMov200(root, root);
+            OnMov200 = new OnMov200(null, root);
         }
         
         private List<ActivityModel> Activities = null;

@@ -35,6 +35,23 @@ namespace OnMov200UI.ViewModels
 
         public ActivityListViewModel Activities => Content as ActivityListViewModel;
 
+        public string FastFixLabel
+        {
+            get
+            {
+                if (OnMov200.NeedFastFixUpdate())
+                {
+                    return "\u26A0 update FastFix.";
+                }
+                else
+                {
+                    return "fastfix OK";
+                }
+            }
+        }
+
+        public bool NeedFastFix => OnMov200.NeedFastFixUpdate();
+
         public async Task ExtractActivities(object w)
         {
             var toExtract = Activities.Activities.Where(x => x.Checked).ToList();
@@ -47,7 +64,11 @@ namespace OnMov200UI.ViewModels
             { 
                 OnMov200.ExtractActivity(activityModel.Activity, folder);
             }
+        }
 
+        public void UpdateFastFix()
+        {
+            OnMov200.UpDateFastFixIfNeeded();
         }
         
         public void SelectAll()
@@ -62,6 +83,11 @@ namespace OnMov200UI.ViewModels
             var NewActivities = Activities.Activities.Select(x => new ActivityModel(x.Activity) {Checked = false});
 
             Content = new ActivityListViewModel(NewActivities);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return false;
         }
     }
 }

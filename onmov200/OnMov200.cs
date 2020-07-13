@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using onmov200.gpx;
 using onmov200.model;
@@ -179,32 +180,17 @@ namespace onmov200
 
         static readonly HttpClient client = new HttpClient();
 
-        public void UpDateFastFixIfNeeded(bool force)
+        public async Task UpDateFastFixIfNeeded(bool force = false)
         {
             if (force || NeedFastFixUpdate())
             {
 
                 try
                 {
-                    HttpResponseMessage response = client.GetAsync(EpoUrl).GetAwaiter().GetResult();
 
-                    Stream responseStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
-
-                    IEnumerable<string> values = new List<string>();
-                    // if (response.Headers.TryGetValues("Last-Modified", out values))
-                    // {
-                    // if (values.Count() == 1)
-                    // {
-                    using (var fileStream = File.OpenWrite(EpoFile))
-                    {
-                        byte[] buffer = new byte[1024];
-                        int count = responseStream.Read(buffer);
-                        while (count > 0)
-                        {
-                            fileStream.Write(buffer, 0, count);
-                            count = responseStream.Read(buffer);
-                        }
-                    }
+                    var wc = new WebClient();
+                    wc.DownloadFile(EpoUrl, EpoFile);
+                   
 
                     long newDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
                     CustomSettings.updateEPODate = newDate;
@@ -239,34 +225,57 @@ namespace onmov200
             WriteCustomSettings();
         }
 
-        private bool NeedFastFixUpdate()
+        public bool NeedFastFixUpdate()
         {
             var now = DateTime.UtcNow;
             long milliseconds = new DateTimeOffset(now).ToUnixTimeMilliseconds();
             if (CustomSettings != null)
             {
                 long diff = milliseconds - CustomSettings.updateEPODate;
-                return (diff > 60 * 60 * 24 * MaxDays);
+
+                long maxMillis = 60 * 60 * 1000 * 24 * MaxDays;
+                
+                bool tooLong = diff > maxMillis; 
+                
+                return tooLong;
             }
 
             return true;
         }
 
+        private CustomSettings DefaultSettings()
+        {
+            return new CustomSettings()
+            {
+                updateEPODate = 0
+            };
+        }
+        
         private CustomSettings ReadCustomSettins()
         {
             if (File.Exists(CustomSettingFile))
             {
-                string content = File.ReadAllText(CustomSettingFile);
-                var settings = JsonConvert.DeserializeObject<CustomSettings>(content);
-                return settings;
+                try
+                {
+                    string content = File.ReadAllText(CustomSettingFile);
+                    if (!string.IsNullOrEmpty(content))
+                    {
+                        var settings = JsonConvert.DeserializeObject<CustomSettings>(content);
+                        return settings;    
+                    }
+                    else
+                    {
+                        return DefaultSettings();
+                    }
+                }
+                catch (Exception e)
+                {
+                    return DefaultSettings();
+                }
             }
             else
             {
-                long newDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-                return new CustomSettings()
-                {
-                    updateEPODate = newDate - (7 * (60 * 60 * 24)) + 2
-                };
+                return DefaultSettings();
             }
         }
 

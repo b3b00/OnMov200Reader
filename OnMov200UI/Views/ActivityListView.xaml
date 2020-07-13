@@ -12,7 +12,7 @@
     
     <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Bottom" >
       <Button Content="Extract activities" CommandParameter="{Binding $parent[TopLevel]}" DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.ExtractActivities}" IsEnabled="{Binding HasSelectedActivities}"/> 
-      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}"><![CDATA[Update FastFix]]></Button>
+      <Button IsVisible="{Binding $parent[Window].DataContext.NeedFastFix}" DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UpdateFastFix}" Content="{Binding $parent[Window].DataContext.FastFixLabel}"></Button>
     </DockPanel>
     
     

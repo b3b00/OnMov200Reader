@@ -46,26 +46,26 @@ jobs:
       if: matrix.os == 'ubuntu-latest' 
       uses: actions/upload-artifact@v2
       with:        
-        name: linux-onmov200UI
-        path: /home/runner/work/OnMov200Reader/OnMov200Reader/OnMov200UI/bin/Release/netcoreapp3.0/publish/   
+        name: linux-onmov200-UI
+        path: /home/runner/work/OnMov200Reader/OnMov200Reader/OnMov200UI/bin/Release/netcoreapp3.0/publish   
     - name: Upload linux CLI Artifact
       if: matrix.os == 'ubuntu-latest' 
       uses: actions/upload-artifact@v2
       with:        
-        name: linux-onmov200CLI
-        path: /home/runner/work/OnMov200Reader/OnMov200Reader/Program/bin/Release/netcoreapp3.0/publish/  
+        name: linux-onmov200-CLI
+        path: /home/runner/work/OnMov200Reader/OnMov200Reader/Program/bin/Release/netcoreapp3.0/publish 
     - name: Upload windows UI Artifact
       if: matrix.os == 'windows-latest' 
       uses: actions/upload-artifact@v2
       with:        
-       name: linux-onmov200UI
-       path: D:\a\OnMov200Reader\OnMov200Reader\OnMov200UI\bin\Release\netcoreapp3.0\publish\ 
+       name: linux-onmov200-UI
+       path: D:\a\OnMov200Reader\OnMov200Reader\OnMov200UI\bin\Release\netcoreapp3.0\publish 
     - name: Upload windows CLI Artifact
       if: matrix.os == 'windows-latest' 
       uses: actions/upload-artifact@v2
       with:        
-        name: windows-onmov200CLI
-        path: D:\a\OnMov200Reader\OnMov200Reader\Program\bin\Release\netcoreapp3.0\publish\ 
+        name: windows-onmov200-CLI
+        path: D:\a\OnMov200Reader\OnMov200Reader\Program\bin\Release\netcoreapp3.0\publish
 
      
 

@@ -15,7 +15,7 @@ namespace ByteReader
 
         public Schema(string name)
         {
-            name = name;
+            Name = name;
             Readers = new List<(string name, Reader reader)>();
         }
         public Schema AddLong(string name)

@@ -6,15 +6,17 @@
              x:Class="OnMov200UI.Views.ActivityListView">
   <DockPanel>
     <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Top" >
-       <Button DockPanel.Dock="Left" Command="{Binding $parent[Window].DataContext.SelectAll}">select all</Button> 
-      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}">deselect all</Button>
+       <Button DockPanel.Dock="Left" Command="{Binding $parent[Window].DataContext.SelectAll}"><![CDATA[select all]]></Button> 
+      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}"><![CDATA[deselect all]]></Button>
     </DockPanel>
-    <!--<Button DockPanel.Dock="Top" Command="{Binding $parent[Window].DataContext.ToggleAll}">
-      Select/Deselect all
-    </Button>-->
-    <Button DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.ExtractActivities}" IsEnabled="{Binding HasSelectedActivities}">
-      extract
-    </Button>
+    
+    <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Bottom" >
+      <Button Content="Extract activities" CommandParameter="{Binding $parent[TopLevel]}" DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.ExtractActivities}" IsEnabled="{Binding HasSelectedActivities}"/> 
+      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}"><![CDATA[Update FastFix]]></Button>
+    </DockPanel>
+    
+    
+    <ScrollViewer> 
     <ItemsControl Items="{Binding Activities}">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
@@ -25,5 +27,6 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+    </ScrollViewer>
   </DockPanel>
 </UserControl>

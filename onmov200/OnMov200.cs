@@ -34,9 +34,9 @@ namespace onmov200
         
         private string CustomSettingFile => Path.Combine(RootDirectory, CustomSettingsFileName);
 
-        private string RootDirectory;
+        public string RootDirectory { get; private set; }
 
-        private string OutputDirectory;
+        public string OutputDirectory { get; set; }
 
         private CustomSettings CustomSettings;
 
@@ -150,12 +150,12 @@ namespace onmov200
             return GetHeader(file);
         }
 
-        public void ExtractActivity(ActivityHeader activity)
+        public void ExtractActivity(ActivityHeader activity, string outputDirectory = null)
         {
-            ExtractActivity(activity.Name);
+            ExtractActivity(activity.Name, outputDirectory);
         }
 
-        public void ExtractActivity(string activity)
+        public void ExtractActivity(string activity, string outputDirectory = null)
         {
             var header = GetHeader(activity);
 
@@ -167,7 +167,7 @@ namespace onmov200
                     var datas = parser.Parse(stream, header.DateTime);
                     if (datas != null && datas.Any())
                     {
-                        GpxSerializer.Serialize(datas, Path.Combine(OutputDirectory, $"{activity}.gpx"));
+                        GpxSerializer.Serialize(datas, Path.Combine(outputDirectory ?? OutputDirectory, $"{activity}.gpx"));
                     }
                 }
                 catch (Exception e)

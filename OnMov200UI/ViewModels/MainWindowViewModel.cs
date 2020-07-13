@@ -1,6 +1,11 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
+using onmov200;
 using onmov200.Models;
 using onmov200.Services;
+using OnMov200UI.Views;
 using ReactiveUI;
 
 namespace OnMov200UI.ViewModels
@@ -10,6 +15,8 @@ namespace OnMov200UI.ViewModels
         ViewModelBase content;
 
         private Database Database;
+
+        private OnMov200 OnMov200 => Database.OnMov200;
 
         public MainWindowViewModel(Database db)
         {
@@ -28,12 +35,17 @@ namespace OnMov200UI.ViewModels
 
         public ActivityListViewModel Activities => Content as ActivityListViewModel;
 
-        public void ExtractActivities()
+        public async Task ExtractActivities(object w)
         {
             var toExtract = Activities.Activities.Where(x => x.Checked).ToList();
-            foreach (var activityModel in toExtract)
+            OpenFolderDialog openFolderDialog = new OpenFolderDialog()
             {
-                Database.OnMov200.ExtractActivity(activityModel.Activity);
+                DefaultDirectory = OnMov200.OutputDirectory
+            };
+            var folder = await  openFolderDialog.ShowAsync(w as MainWindow);
+            foreach (var activityModel in toExtract)
+            { 
+                OnMov200.ExtractActivity(activityModel.Activity, folder);
             }
 
         }

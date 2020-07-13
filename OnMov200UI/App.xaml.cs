@@ -20,9 +20,10 @@ namespace OnMov200UI
             {
                 var db = new Database(@"C:\Users\olduh\Desktop\perso\onmov200");
 
+                var context = new MainWindowViewModel(db);
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(db),
+                    DataContext = context
                 };
             }
 

@@ -36,17 +36,51 @@ namespace onmov200
 
         private string RootDirectory;
 
-        private string OutputDir;
+        private string OutputDirectory;
 
         private CustomSettings CustomSettings;
 
-        
-
-
-        public OnMov200(string rootDirectory, string outputDir)
+        public void DetectDevice(string rootDir = null)
         {
-            RootDirectory = rootDirectory;
-            OutputDir = outputDir;
+            if (string.IsNullOrEmpty(rootDir))
+            {
+                var drives = DriveInfo.GetDrives();
+                var drive = drives.FirstOrDefault(x =>
+                    x.VolumeLabel.Contains("onmove-200", StringComparison.InvariantCultureIgnoreCase));
+                if (drive != null)
+                {
+                    RootDirectory = drive.RootDirectory.FullName;
+                    OutputDirectory = Environment.CurrentDirectory;
+                }
+                else
+                {
+                    // TODO 
+                }
+            }
+            else
+            {
+                RootDirectory = rootDir;
+            }
+        }
+
+        public OnMov200(string outputDirectory) 
+        {
+            DetectDevice();
+            OutputDirectory = outputDirectory;
+        }
+
+        public OnMov200(string rootDirectory, string outputDirectory)
+        {
+            DetectDevice(rootDirectory);
+            
+            if (string.IsNullOrEmpty(outputDirectory))
+            {
+                OutputDirectory = Environment.CurrentDirectory;
+            }
+            else
+            {
+                OutputDirectory = outputDirectory;
+            }
             CustomSettings = ReadCustomSettins();
         }
 
@@ -130,7 +164,7 @@ namespace onmov200
                 var datas = parser.Parse(stream, header.DateTime);
                 if (datas != null && datas.Any())
                 {
-                    GpxSerializer.Serialize(datas, Path.Combine(OutputDir, $"{activity}.gpx"));
+                    GpxSerializer.Serialize(datas, Path.Combine(OutputDirectory, $"{activity}.gpx"));
                 }
             }
             catch (Exception e)
@@ -141,9 +175,9 @@ namespace onmov200
 
         static readonly HttpClient client = new HttpClient();
 
-        public void UpDateFastFixIfNeeded()
+        public void UpDateFastFixIfNeeded(bool force)
         {
-            if (NeedFastFixUpdate())
+            if (force || NeedFastFixUpdate())
             {
 
                 try
@@ -205,8 +239,13 @@ namespace onmov200
         {
             var now = DateTime.UtcNow;
             long milliseconds = new DateTimeOffset(now).ToUnixTimeMilliseconds();
-            long diff = milliseconds - CustomSettings.updateEPODate;
-            return (diff > 60 * 60 * 24 * MaxDays);
+            if (CustomSettings != null)
+            {
+                long diff = milliseconds - CustomSettings.updateEPODate;
+                return (diff > 60 * 60 * 24 * MaxDays);
+            }
+
+            return true;
         }
 
         private CustomSettings ReadCustomSettins()

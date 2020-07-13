@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
 
-namespace avaTodo.Views
+namespace OnMov200UI.Views
 {
     public class MainWindow : Window
     {

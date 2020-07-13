@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using onmov200.model;
 
-namespace avaTodo.Models
+namespace onmov200.Models
 {
     public class ActivityModel
     {

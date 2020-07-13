@@ -1,8 +1,8 @@
 using System.Reactive;
+using onmov200.Models;
 using ReactiveUI;
-using avaTodo.Models;
 
-namespace avaTodo.ViewModels
+namespace OnMov200UI.ViewModels
 {
     class AddItemViewModel : ViewModelBase
     {

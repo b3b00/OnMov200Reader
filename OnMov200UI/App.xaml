@@ -1,7 +1,7 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:avaTodo"
-             x:Class="avaTodo.App">
+             xmlns:local="clr-namespace:onmov200"
+             x:Class="OnMov200UI.App">
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>

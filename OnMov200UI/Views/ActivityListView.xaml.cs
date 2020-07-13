@@ -1,20 +1,19 @@
-using Avalonia;
+using System;
+using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using onmov200.Models;
 using ReactiveUI;
-using avaTodo.Models;
-using System.Reactive;
-using System;
 
-namespace avaTodo.Views
+namespace OnMov200UI.Views
 {
-    public class TodoListView : UserControl
+    public class ActivityListView : UserControl
     {
 
         public ReactiveCommand<TodoItem,Unit> CheckThis { get; }
 
         
-        public TodoListView()
+        public ActivityListView()
         {
             CheckThis = ReactiveCommand.Create(
                 (TodoItem item) => {

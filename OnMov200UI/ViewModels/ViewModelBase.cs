@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ReactiveUI;
+﻿using ReactiveUI;
 
-namespace avaTodo.ViewModels
+namespace OnMov200UI.ViewModels
 {
     public class ViewModelBase : ReactiveObject
     {

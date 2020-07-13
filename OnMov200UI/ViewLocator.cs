@@ -4,9 +4,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using avaTodo.ViewModels;
+using OnMov200UI.ViewModels;
 
-namespace avaTodo
+namespace onmov200
 {
     public class ViewLocator : IDataTemplate
     {

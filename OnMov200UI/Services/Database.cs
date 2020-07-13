@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using avaTodo.Models;
 using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
 using onmov200;
+using onmov200.Models;
 
-namespace avaTodo.Services
+namespace onmov200.Services
 {
     public class Database
     {
-        private OnMov200 OnMov200;
+        public OnMov200 OnMov200 { get; private set; }
 
         public Database(string root)
         {
@@ -18,7 +18,7 @@ namespace avaTodo.Services
         
         private List<ActivityModel> Activities = null;
 
-        public IEnumerable<ActivityModel> GetItems()
+        public IEnumerable<ActivityModel> GetActivities()
         {
 
             if (Activities == null)

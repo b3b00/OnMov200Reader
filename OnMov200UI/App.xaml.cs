@@ -1,11 +1,11 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using avaTodo.Services;
-using avaTodo.ViewModels;
-using avaTodo.Views;
+using onmov200.Services;
+using OnMov200UI.Views;
+using OnMov200UI.ViewModels;
 
-namespace avaTodo
+namespace OnMov200UI
 {
     public class App : Application
     {

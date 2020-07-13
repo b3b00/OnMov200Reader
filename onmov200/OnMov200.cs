@@ -47,6 +47,8 @@ namespace onmov200
                 var drives = DriveInfo.GetDrives();
                 var drive = drives.FirstOrDefault(x =>
                     x.VolumeLabel.Contains("onmove-200", StringComparison.InvariantCultureIgnoreCase));
+                
+                
                 if (drive != null)
                 {
                     RootDirectory = drive.RootDirectory.FullName;
@@ -157,19 +159,21 @@ namespace onmov200
         {
             var header = GetHeader(activity);
 
-            var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open);
-            OMDParser parser = new OMDParser();
-            try
+            using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
             {
-                var datas = parser.Parse(stream, header.DateTime);
-                if (datas != null && datas.Any())
+                OMDParser parser = new OMDParser();
+                try
                 {
-                    GpxSerializer.Serialize(datas, Path.Combine(OutputDirectory, $"{activity}.gpx"));
+                    var datas = parser.Parse(stream, header.DateTime);
+                    if (datas != null && datas.Any())
+                    {
+                        GpxSerializer.Serialize(datas, Path.Combine(OutputDirectory, $"{activity}.gpx"));
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
+                catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
+                }
             }
         }
 

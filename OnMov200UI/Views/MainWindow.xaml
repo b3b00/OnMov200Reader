@@ -1,0 +1,8 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="OnMov200UI.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Width="500" Height="300"
+        Title="Free On Mov 200"
+        Content="{Binding Content}">
+</Window>

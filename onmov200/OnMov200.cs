@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using onmov200.gpx;
 using onmov200.model;
@@ -34,19 +35,55 @@ namespace onmov200
         
         private string CustomSettingFile => Path.Combine(RootDirectory, CustomSettingsFileName);
 
-        private string RootDirectory;
+        public string RootDirectory { get; private set; }
 
-        private string OutputDir;
+        public string OutputDirectory { get; set; }
 
         private CustomSettings CustomSettings;
 
-        
-
-
-        public OnMov200(string rootDirectory, string outputDir)
+        public void DetectDevice(string rootDir = null)
         {
-            RootDirectory = rootDirectory;
-            OutputDir = outputDir;
+            if (string.IsNullOrEmpty(rootDir))
+            {
+                var drives = DriveInfo.GetDrives();
+                var drive = drives.FirstOrDefault(x =>
+                    x.VolumeLabel.Contains("onmove-200", StringComparison.InvariantCultureIgnoreCase));
+                
+                
+                if (drive != null)
+                {
+                    RootDirectory = drive.RootDirectory.FullName;
+                    OutputDirectory = Environment.CurrentDirectory;
+                }
+                else
+                {
+                    // TODO 
+                }
+            }
+            else
+            {
+                RootDirectory = rootDir;
+            }
+        }
+
+        public OnMov200(string outputDirectory) 
+        {
+            DetectDevice();
+            OutputDirectory = outputDirectory;
+        }
+
+        public OnMov200(string rootDirectory, string outputDirectory)
+        {
+            DetectDevice(rootDirectory);
+            
+            if (string.IsNullOrEmpty(outputDirectory))
+            {
+                OutputDirectory = Environment.CurrentDirectory;
+            }
+            else
+            {
+                OutputDirectory = outputDirectory;
+            }
             CustomSettings = ReadCustomSettins();
         }
 
@@ -114,59 +151,46 @@ namespace onmov200
             return GetHeader(file);
         }
 
-        public void ExtractActivity(ActivityHeader activity)
+        public void ExtractActivity(ActivityHeader activity, string outputDirectory = null)
         {
-            ExtractActivity(activity.Name);
+            ExtractActivity(activity.Name, outputDirectory);
         }
 
-        public void ExtractActivity(string activity)
+        public void ExtractActivity(string activity, string outputDirectory = null)
         {
             var header = GetHeader(activity);
 
-            var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open);
-            OMDParser parser = new OMDParser();
-            try
+            using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
             {
-                var datas = parser.Parse(stream, header.DateTime);
-                if (datas != null && datas.Any())
+                OMDParser parser = new OMDParser();
+                try
                 {
-                    GpxSerializer.Serialize(datas, Path.Combine(OutputDir, $"{activity}.gpx"));
+                    var datas = parser.Parse(stream, header.DateTime);
+                    if (datas != null && datas.Any())
+                    {
+                        GpxSerializer.Serialize(datas, Path.Combine(outputDirectory ?? OutputDirectory, $"{activity}.gpx"));
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
+                catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
+                }
             }
         }
 
         static readonly HttpClient client = new HttpClient();
 
-        public void UpDateFastFixIfNeeded()
+        public async Task UpDateFastFixIfNeeded(bool force = false)
         {
-            if (NeedFastFixUpdate())
+            if (force || NeedFastFixUpdate())
             {
 
                 try
                 {
-                    HttpResponseMessage response = client.GetAsync(EpoUrl).GetAwaiter().GetResult();
 
-                    Stream responseStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
-
-                    IEnumerable<string> values = new List<string>();
-                    // if (response.Headers.TryGetValues("Last-Modified", out values))
-                    // {
-                    // if (values.Count() == 1)
-                    // {
-                    using (var fileStream = File.OpenWrite(EpoFile))
-                    {
-                        byte[] buffer = new byte[1024];
-                        int count = responseStream.Read(buffer);
-                        while (count > 0)
-                        {
-                            fileStream.Write(buffer, 0, count);
-                            count = responseStream.Read(buffer);
-                        }
-                    }
+                    var wc = new WebClient();
+                    wc.DownloadFile(EpoUrl, EpoFile);
+                   
 
                     long newDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
                     CustomSettings.updateEPODate = newDate;
@@ -201,29 +225,57 @@ namespace onmov200
             WriteCustomSettings();
         }
 
-        private bool NeedFastFixUpdate()
+        public bool NeedFastFixUpdate()
         {
             var now = DateTime.UtcNow;
             long milliseconds = new DateTimeOffset(now).ToUnixTimeMilliseconds();
-            long diff = milliseconds - CustomSettings.updateEPODate;
-            return (diff > 60 * 60 * 24 * MaxDays);
+            if (CustomSettings != null)
+            {
+                long diff = milliseconds - CustomSettings.updateEPODate;
+
+                long maxMillis = 60 * 60 * 1000 * 24 * MaxDays;
+                
+                bool tooLong = diff > maxMillis; 
+                
+                return tooLong;
+            }
+
+            return true;
         }
 
+        private CustomSettings DefaultSettings()
+        {
+            return new CustomSettings()
+            {
+                updateEPODate = 0
+            };
+        }
+        
         private CustomSettings ReadCustomSettins()
         {
             if (File.Exists(CustomSettingFile))
             {
-                string content = File.ReadAllText(CustomSettingFile);
-                var settings = JsonConvert.DeserializeObject<CustomSettings>(content);
-                return settings;
+                try
+                {
+                    string content = File.ReadAllText(CustomSettingFile);
+                    if (!string.IsNullOrEmpty(content))
+                    {
+                        var settings = JsonConvert.DeserializeObject<CustomSettings>(content);
+                        return settings;    
+                    }
+                    else
+                    {
+                        return DefaultSettings();
+                    }
+                }
+                catch (Exception e)
+                {
+                    return DefaultSettings();
+                }
             }
             else
             {
-                long newDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
-                return new CustomSettings()
-                {
-                    updateEPODate = newDate - (7 * (60 * 60 * 24)) + 2
-                };
+                return DefaultSettings();
             }
         }
 

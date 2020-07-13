@@ -9,7 +9,7 @@ namespace program
     {
         static void Extract(ExtractOptions options)
         {
-            OnMov200 onMov200 = new OnMov200(options.RootDir, options.OutputDir ?? options.RootDir);
+            OnMov200 onMov200 = new OnMov200(options.RootDir,options.OutputDir);
 
             var activities  = onMov200.GetHeaders();
             int i = 0;
@@ -38,8 +38,7 @@ namespace program
 
         static void List(ListOptions options)
         {
-            OnMov200 onMov200 = new OnMov200(options.RootDir, options.RootDir);
-
+            OnMov200 onMov200 = new OnMov200(options.RootDir,options.OutputDir);
             onMov200.PrintSummary();
         }
 
@@ -47,7 +46,7 @@ namespace program
         {
             OnMov200 onMov200 = new OnMov200(options.RootDir, options.RootDir);
 
-            onMov200.UpDateFastFixIfNeeded();
+            onMov200.UpDateFastFixIfNeeded(options.Force).GetAwaiter().GetResult();
         }
 
         static void Main(string[] args)

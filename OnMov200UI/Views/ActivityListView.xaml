@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="300"
+             x:Class="OnMov200UI.Views.ActivityListView">
+  <DockPanel>
+    <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Top" >
+       <Button DockPanel.Dock="Left" Command="{Binding $parent[Window].DataContext.SelectAll}"><![CDATA[select all]]></Button> 
+      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}"><![CDATA[deselect all]]></Button>
+    </DockPanel>
+    
+    <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Bottom" >
+      <Button Content="Extract activities" CommandParameter="{Binding $parent[TopLevel]}" DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.ExtractActivities}" IsEnabled="{Binding HasSelectedActivities}"/> 
+      <Button IsVisible="{Binding $parent[Window].DataContext.NeedFastFix}" DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UpdateFastFix}" Content="{Binding $parent[Window].DataContext.FastFixLabel}"></Button>
+    </DockPanel>
+    
+    
+    <ScrollViewer> 
+    <ItemsControl Items="{Binding Activities}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <CheckBox Margin="4"
+                    IsChecked="{Binding Checked}"
+                    Content="{Binding Label}"             
+                    />
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

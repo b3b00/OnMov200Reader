@@ -1,0 +1,45 @@
+name: .NET Core
+
+on:
+  push:
+    branches: 
+      - dev
+      - tech/actions 
+      - master
+  pull_request:
+    branches: 
+      - dev
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest]
+    steps:
+    
+
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101   
+    - name: set environment variables
+      uses: allenevans/set-env@v1.0.0
+      with:
+          TESTS_PATH: './FormulaeTests'
+          PUBLISH_NUGET: true
+          RUN_TESTS: true
+          MAIN_CSPROJ: 'formulae/formulae.csproj'
+          COVERAGE_EXCLUDES: '[program]*'
+    - name: Printenv
+      run: |
+          echo "publichs=${PUBLISH_NUGET}"
+          echo "main=${MAIN_CSPROJ}"
+          printenv  
+    - name: Build with dotnet 
+      run: dotnet build --configuration Release 
+    - name: publish with dotnet    
+      run: dotnet publish --configuration Release     
+

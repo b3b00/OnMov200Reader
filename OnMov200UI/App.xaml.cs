@@ -18,7 +18,7 @@ namespace OnMov200UI
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var db = new Database(@"C:\Users\olduh\Desktop\perso\onmov200");
+                var db = new Database("./");
 
                 var context = new MainWindowViewModel(db);
                 desktop.MainWindow = new MainWindow

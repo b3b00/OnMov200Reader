@@ -21,7 +21,14 @@ namespace OnMov200UI.ViewModels
         public MainWindowViewModel(Database db)
         {
             Database = db;
-            Content = new ActivityListViewModel(db.GetActivities());
+            string root =  db.OnMov200.Detect(6);
+            if (root != null) {
+                db.OnMov200.Initialize(root);
+                Content = new ActivityListViewModel(db.GetActivities());
+            }
+            else {
+                Content = new NoDeviceViewModel();
+            }
         }
 
         public ViewModelBase Content

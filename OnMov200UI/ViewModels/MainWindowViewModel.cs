@@ -97,6 +97,17 @@ namespace OnMov200UI.ViewModels
             Content = new ActivityListViewModel(NewActivities);
         }
 
+        public void DetectWatch() {
+            string root =  Database.OnMov200.Detect(6);
+            if (root != null) {
+                Database.OnMov200.Initialize(root);
+                Content = new ActivityListViewModel(Database.GetActivities());
+            }
+            else {
+                Content = new NoDeviceViewModel();
+            }
+        }
+
         public override bool Equals(object obj)
         {
             return false;

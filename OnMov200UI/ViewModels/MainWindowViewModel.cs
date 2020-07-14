@@ -57,20 +57,19 @@ namespace OnMov200UI.ViewModels
             var toExtract = Activities.Activities.Where(x => x.Checked).ToList();
             OpenFolderDialog openFolderDialog = new OpenFolderDialog()
             {
-                DefaultDirectory = OnMov200.OutputDirectory
+                Directory = OnMov200.OutputDirectory
             };
             var folder = await  openFolderDialog.ShowAsync(w as MainWindow);
             foreach (var activityModel in toExtract)
-            { 
+            {
                 OnMov200.ExtractActivity(activityModel.Activity, folder);
             }
         }
 
-        public void UpdateFastFix()
+        public async Task UpdateFastFix()
         {
-            OnMov200.UpDateFastFixIfNeeded();
+            await OnMov200.UpDateFastFixIfNeeded();
         }
-        
         public void SelectAll()
         {
             var NewActivities = Activities.Activities.Select(x => new ActivityModel(x.Activity) {Checked = true});
@@ -91,7 +90,7 @@ namespace OnMov200UI.ViewModels
             Content = new ActivityListViewModel(NewActivities);
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return false;
         }

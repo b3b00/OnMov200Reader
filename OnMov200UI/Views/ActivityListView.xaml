@@ -23,6 +23,8 @@
           <CheckBox Margin="4"
                     IsChecked="{Binding Checked}"
                     Content="{Binding Label}"             
+                    Command="{Binding $parent[Window].DataContext.ChangeSelection}"
+                    CommandParameter="{Binding Activity.Name}"
                     />
         </DataTemplate>
       </ItemsControl.ItemTemplate>

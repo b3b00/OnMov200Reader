@@ -85,6 +85,12 @@ namespace OnMov200UI.ViewModels
             Content = new ActivityListViewModel(NewActivities);
         }
 
+        public void ChangeSelection(string name) {
+            var NewActivities = Activities.Activities.Select(x => new ActivityModel(x.Activity) {Checked = x.Checked, Dirty = x.Activity.Name == name ^ x.Dirty});
+
+            Content = new ActivityListViewModel(NewActivities);
+        }
+
         public override bool Equals(object? obj)
         {
             return false;

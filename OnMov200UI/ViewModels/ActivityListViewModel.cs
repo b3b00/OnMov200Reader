@@ -16,7 +16,7 @@ namespace OnMov200UI.ViewModels
 
         public ObservableCollection<ActivityModel> Activities { get; }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj != null)
             {
@@ -31,7 +31,7 @@ namespace OnMov200UI.ViewModels
                             {
                                 return false;
                             }
-                            if (otherActivity.Checked != activity.Checked)
+                            if (otherActivity.Checked != activity.Checked || otherActivity.Dirty != activity.Dirty)
                             {
                                 return false;
                             }
@@ -44,6 +44,6 @@ namespace OnMov200UI.ViewModels
 
             return false;
         }
-        
+
     }
 }

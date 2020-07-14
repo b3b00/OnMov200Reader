@@ -7,12 +7,9 @@ using ReactiveUI;
 
 namespace OnMov200UI.Views
 {
-    public class ActivityListView : UserControl
+    public class NoDeviceView : UserControl
     {
-
-
-        
-        public ActivityListView()
+        public NoDeviceView()
         {
             InitializeComponent();
         }

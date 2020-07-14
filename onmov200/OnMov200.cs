@@ -28,11 +28,11 @@ namespace onmov200
         public const string DataDirName = "DATA";
 
         public const string EpoFileName = "epo.7";
-        
+
         private string DataRoot => Path.Combine(RootDirectory, DataDirName);
 
         private string EpoFile => Path.Combine(RootDirectory, EpoFileName);
-        
+
         private string CustomSettingFile => Path.Combine(RootDirectory, CustomSettingsFileName);
 
         public string RootDirectory { get; private set; }
@@ -46,10 +46,8 @@ namespace onmov200
             if (string.IsNullOrEmpty(rootDir))
             {
                 var drives = DriveInfo.GetDrives();
-                var drive = drives.FirstOrDefault(x =>
+                var drive = Array.Find(drives, x =>
                     x.VolumeLabel.Contains("onmove-200", StringComparison.InvariantCultureIgnoreCase));
-                
-                
                 if (drive != null)
                 {
                     RootDirectory = drive.RootDirectory.FullName;
@@ -66,25 +64,53 @@ namespace onmov200
             }
         }
 
-        public OnMov200(string outputDirectory) 
+        public string Detect(int tries)
+        {
+            string directory = null;
+            int i = 0;
+            while (i < tries && directory == null)
+            {
+                var drives = DriveInfo.GetDrives();
+                var drive = Array.Find(drives, x =>
+                    x.VolumeLabel.Contains("onmove-200", StringComparison.InvariantCultureIgnoreCase));
+                if (drive != null)
+                {
+                    directory = drive.RootDirectory.FullName;
+                }
+                Thread.Sleep(500);
+                i++;
+            }
+            return directory;
+        }
+
+        public OnMov200(string outputDirectory)
         {
             DetectDevice();
             OutputDirectory = outputDirectory;
         }
 
-        public OnMov200(string rootDirectory, string outputDirectory)
+
+        public OnMov200(string rootDirectory, string outputDirectory, bool initialize = true)
         {
+            if (initialize) {
+                Initialize(rootDirectory,outputDirectory);
+            }
+        }
+
+
+        public void Initialize(string rootDirectory, string outputDirectory = null) {
+
             DetectDevice(rootDirectory);
-            
+
             if (string.IsNullOrEmpty(outputDirectory))
-            {
-                OutputDirectory = Environment.CurrentDirectory;
-            }
-            else
-            {
-                OutputDirectory = outputDirectory;
-            }
-            CustomSettings = ReadCustomSettins();
+                {
+                    OutputDirectory = Environment.CurrentDirectory;
+                }
+                else
+                {
+                    OutputDirectory = outputDirectory;
+                }
+                CustomSettings = ReadCustomSettings();
         }
 
         public void PrintSummary()
@@ -190,7 +216,7 @@ namespace onmov200
 
                     var wc = new WebClient();
                     wc.DownloadFile(EpoUrl, EpoFile);
-                   
+
 
                     long newDate = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
                     CustomSettings.updateEPODate = newDate;
@@ -234,9 +260,9 @@ namespace onmov200
                 long diff = milliseconds - CustomSettings.updateEPODate;
 
                 long maxMillis = 60 * 60 * 1000 * 24 * MaxDays;
-                
-                bool tooLong = diff > maxMillis; 
-                
+
+                bool tooLong = diff > maxMillis;
+
                 return tooLong;
             }
 
@@ -250,8 +276,8 @@ namespace onmov200
                 updateEPODate = 0
             };
         }
-        
-        private CustomSettings ReadCustomSettins()
+
+        private CustomSettings ReadCustomSettings()
         {
             if (File.Exists(CustomSettingFile))
             {
@@ -261,7 +287,7 @@ namespace onmov200
                     if (!string.IsNullOrEmpty(content))
                     {
                         var settings = JsonConvert.DeserializeObject<CustomSettings>(content);
-                        return settings;    
+                        return settings;
                     }
                     else
                     {

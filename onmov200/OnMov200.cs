@@ -179,30 +179,35 @@ namespace onmov200
 
         public void ExtractActivity(ActivityHeader activity, string outputDirectory = null)
         {
-            ExtractActivity(activity.Name, outputDirectory);
+            if (activity != null)
+            {
+                string name = activity.DateTime.ToString("yyyyMmddhhmm");
+
+                using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
+                {
+                    OMDParser parser = new OMDParser();
+                    try
+                    {
+                        var datas = parser.Parse(stream, activity.DateTime);
+                        if (datas != null && datas.Any())
+                        {
+                            GpxSerializer.Serialize(datas,
+                                Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx"));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
+                    }
+                }
+            }
         }
 
         public void ExtractActivity(string activity, string outputDirectory = null)
         {
             var header = GetHeader(activity);
-            string name = header.DateTime.ToString("yyyyMmddhhmm");
-
-            using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
-            {
-                OMDParser parser = new OMDParser();
-                try
-                {
-                    var datas = parser.Parse(stream, header.DateTime);
-                    if (datas != null && datas.Any())
-                    {
-                        GpxSerializer.Serialize(datas, Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx"));
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
-                }
-            }
+            ExtractActivity(header,outputDirectory);
+            
         }
 
         static readonly HttpClient client = new HttpClient();

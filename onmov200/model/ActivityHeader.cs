@@ -29,6 +29,14 @@ namespace onmov200.model
         
         public string Name { get; set; }
 
+        public bool IsMissing { get; set; } = false;
+
+        public ActivityHeader(string name)
+        {
+            IsMissing = true;
+            Name = name;
+        }
+        
         public ActivityHeader(Dictionary<string, object> data, string name)
         {
             Name = name;
@@ -46,9 +54,17 @@ namespace onmov200.model
 
         public override string ToString()
         {
-            int hour = Duration / 3600;
-            int min = (Duration % 3600) / 60;
-            return $"{DateTime.ToString("dd/MM/yyyy HH:mm")} {Distance / 1000} km {hour}h{min}m {AverageSpeed} km/h";
+            if (IsMissing)
+            {
+                return $"entête manquant : {Name}";
+            }
+            else
+            {
+                int hour = Duration / 3600;
+                int min = (Duration % 3600) / 60;
+                return
+                    $"{DateTime.ToString("dd/MM/yyyy HH:mm")} {Distance / 1000} km {hour}h{min}m {AverageSpeed} km/h";
+            }
         }
         
         

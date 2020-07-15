@@ -124,15 +124,28 @@ namespace onmov200
 
         public List<ActivityHeader> GetHeaders()
         {
-            var files = Directory.GetFiles(DataRoot, "*.OMH");
+            var headerFiles = Directory.GetFiles(DataRoot, "*.OMH");
             var headers = new List<ActivityHeader>();
 
-            foreach (var file in files)
+            foreach (var file in headerFiles)
             {
                 var header = GetHeader(new FileInfo(file));
                 headers.Add(header);
             }
 
+            var dataFiles = Directory.GetFiles(DataRoot, "*.OMD");
+            foreach (var file in dataFiles)
+            {
+                FileInfo fi = new FileInfo(file);
+                string name = fi.Name.Replace(".OMD", "") ;
+                if (!headers.Exists(x => x.Name == name))
+                {
+                    ActivityHeader missingHeader = new ActivityHeader(name);
+                    headers.Add(missingHeader); 
+                }
+            }
+            
+            
             return headers;
         }
 
@@ -179,20 +192,14 @@ namespace onmov200
 
         public void ExtractActivity(ActivityHeader activity, string outputDirectory = null)
         {
-            ExtractActivity(activity.Name, outputDirectory);
-        }
+            string name = activity.IsMissing ? activity.Name : activity.DateTime.ToString("yyyyMmddhhmm");
 
-        public void ExtractActivity(string activity, string outputDirectory = null)
-        {
-            var header = GetHeader(activity);
-            string name = header.DateTime.ToString("yyyyMmddhhmm");
-
-            using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
+            using (var stream = File.Open(Path.Combine(DataRoot, $"{name}.OMD"), FileMode.Open))
             {
                 OMDParser parser = new OMDParser();
                 try
                 {
-                    var datas = parser.Parse(stream, header.DateTime);
+                    var datas = parser.Parse(stream, activity.DateTime);
                     if (datas != null && datas.Any())
                     {
                         GpxSerializer.Serialize(datas, Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx"));
@@ -203,6 +210,11 @@ namespace onmov200
                     Console.WriteLine($"ERROR on activity {activity} : {e.Message}");
                 }
             }
+        }
+
+        public void ExtractActivity(string activity, string outputDirectory = null)
+        {
+            ExtractActivity(GetHeader(activity),outputDirectory);
         }
 
         static readonly HttpClient client = new HttpClient();

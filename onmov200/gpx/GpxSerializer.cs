@@ -32,9 +32,11 @@ namespace onmov200.gpx
 
         public static string WayPointXML(WayPoint wayPoint)
         {
+            
         return  $@"<trkpt lat=""{wayPoint.Latitude.ToString().Replace(",",".")}"" lon=""{wayPoint.Longitude.ToString().Replace(",",".")}"">
-            <extensions>
-                <time>{wayPoint.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffffffK")}</time>
+            <time>{wayPoint.Time.ToString("yyyy-MM-ddTHH:mm:ss.fffffffK")}</time>
+            <ele>{wayPoint.Elevation}</ele>
+            <extensions>                
                 <gpxtpx:TrackPointExtension>
                         <gpxtpx:hr>{wayPoint.HR}</gpxtpx:hr>
                     </gpxtpx:TrackPointExtension>

@@ -9,9 +9,9 @@
 	
   <Border Margin="5"
         Padding="10"
-        ToolTip.Tip="Click to retry">
+        ToolTip.Tip="Cliquer pour réessayer.">
   <Button  Command="{Binding $parent[Window].DataContext.DetectWatch}">    
-  Watch not found
+  OnMov200 introuvable
   </Button>
   </Border>
 </Viewbox>

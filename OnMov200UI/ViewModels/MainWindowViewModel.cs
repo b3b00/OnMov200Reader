@@ -8,6 +8,9 @@ using onmov200.Services;
 using OnMov200UI.Views;
 using ReactiveUI;
 
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.Enums;
+
 namespace OnMov200UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
@@ -48,11 +51,11 @@ namespace OnMov200UI.ViewModels
             {
                 if (OnMov200.NeedFastFixUpdate())
                 {
-                    return "\u26A0 update FastFix.";
+                    return "Mise à jour du FastFix.";
                 }
                 else
                 {
-                    return "fastfix OK";
+                    return "Fastfix OK";
                 }
             }
         }
@@ -75,7 +78,20 @@ namespace OnMov200UI.ViewModels
 
         public async Task UpdateFastFix()
         {
-            await OnMov200.UpDateFastFixIfNeeded();
+            if (NeedFastFix)
+            {
+                await OnMov200.UpDateFastFixIfNeeded();
+            }
+            else
+            {
+                var answer = await MessageBoxManager
+                    .GetMessageBoxStandardWindow("mise à jour du FastFix", "êtes vous sûr de vouloir forcer la mise à jour du FastFix ? ", ButtonEnum.YesNo, Icon.Plus).Show();
+                if (answer == ButtonResult.Yes)
+                {
+                    await OnMov200.UpDateFastFixIfNeeded(true);
+                }
+                    
+            }
         }
         public void SelectAll()
         {

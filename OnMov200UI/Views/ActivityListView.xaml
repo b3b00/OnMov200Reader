@@ -6,13 +6,14 @@
              x:Class="OnMov200UI.Views.ActivityListView">
   <DockPanel>
     <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Top" >
-       <Button DockPanel.Dock="Left" Command="{Binding $parent[Window].DataContext.SelectAll}"><![CDATA[select all]]></Button> 
-      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}"><![CDATA[deselect all]]></Button>
+       <Button DockPanel.Dock="Left" Command="{Binding $parent[Window].DataContext.SelectAll}"><![CDATA[Tout sélectionner]]></Button> 
+      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UnSelectAll}"><![CDATA[Tout désélectionner]]></Button>
     </DockPanel>
     
     <DockPanel HorizontalAlignment="Left" DockPanel.Dock="Bottom" >
-      <Button Content="Extract activities" CommandParameter="{Binding $parent[TopLevel]}" DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.ExtractActivities}" IsEnabled="{Binding HasSelectedActivities}"/> 
-      <Button IsVisible="{Binding $parent[Window].DataContext.NeedFastFix}" DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UpdateFastFix}" Content="{Binding $parent[Window].DataContext.FastFixLabel}"></Button>
+      <Button Content="Exporter les activités" CommandParameter="{Binding $parent[TopLevel]}" DockPanel.Dock="Bottom" Command="{Binding $parent[Window].DataContext.ExtractActivities}" IsEnabled="{Binding HasSelectedActivities}"/> 
+      <Button DockPanel.Dock="Right" Command="{Binding $parent[Window].DataContext.UpdateFastFix}" Content="{Binding $parent[Window].DataContext.FastFixLabel}"></Button>
+      <!-- IsVisible="{Binding $parent[Window].DataContext.NeedFastFix}" -->
     </DockPanel>
     
     

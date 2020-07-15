@@ -185,6 +185,7 @@ namespace onmov200
         public void ExtractActivity(string activity, string outputDirectory = null)
         {
             var header = GetHeader(activity);
+            string name = header.DateTime.ToString("yyyyMmddhhmm");
 
             using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
             {
@@ -194,7 +195,7 @@ namespace onmov200
                     var datas = parser.Parse(stream, header.DateTime);
                     if (datas != null && datas.Any())
                     {
-                        GpxSerializer.Serialize(datas, Path.Combine(outputDirectory ?? OutputDirectory, $"{activity}.gpx"));
+                        GpxSerializer.Serialize(datas, Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx"));
                     }
                 }
                 catch (Exception e)

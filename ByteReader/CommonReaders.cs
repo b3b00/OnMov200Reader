@@ -10,7 +10,6 @@ namespace ByteReader
         {
             byte[] newArray = new[] { input[2], input[3], input[0], input[1] };
             var f =  BitConverter.ToSingle(newArray, 0);
-            var f2 =  BitConverter.ToSingle(input, 0);
             return f;
         }
         
@@ -31,29 +30,29 @@ namespace ByteReader
         {
             byte[] buffer = new byte[2];
             stream.Read(buffer, 0, 2);
-            int Int = buffer[0] | ( (int)buffer[1] << 8 );
-            return Int;
+            int int2 = buffer[0] |  (buffer[1] << 8);
+            return int2;
         }
         
         public static  object ReadInt4(Stream stream)
         {
             byte[] buffer = new byte[4];
             stream.Read(buffer, 0, 4);
-            int Int = buffer[0] | ( (int)buffer[1] << 8 ) | ( (int)buffer[2] << 16 ) | ( (int)buffer[3] << 24 );
-            return Int;
+            int int4 = buffer[0] | ( buffer[1] << 8 ) | ( buffer[2] << 16 ) | ( buffer[3] << 24 );
+            return int4;
         }
         
         public static  object ReadInt1(Stream stream)
         {
             byte[] buffer = new byte[1];
             stream.Read(buffer, 0, 1);
-            int Int = buffer[0];
-            return Int;
+            int int1 = buffer[0];
+            return int1;
         }
 
         public static Schema.Reader Reserved(int length)
         {
-            return (Stream stream) =>
+            return (stream) =>
             {
                 byte[] buffer = new byte[length];
                 stream.Read(buffer, 0, length);

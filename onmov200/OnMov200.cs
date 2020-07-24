@@ -161,7 +161,7 @@ namespace onmov200
         private ActivityHeader GetHeader(FileInfo file)
         {
             Dictionary<string, object> omh;
-            using (var stream = File.Open(file.FullName, FileMode.Open))
+            using (var stream = File.Open(file.FullName, FileMode.Open,FileAccess.Read))
             {
                 omh = OnMov200Schemas.OMH.Read(stream);
             }
@@ -183,7 +183,7 @@ namespace onmov200
             {
                 string name = activity.DateTime.ToString("yyyyMmddhhmm");
 
-                using (var stream = File.Open(Path.Combine(DataRoot, $"{activity}.OMD"), FileMode.Open))
+                using (var stream = File.Open(Path.Combine(DataRoot, $"{activity.Name}.OMD"), FileMode.Open,FileAccess.Read))
                 {
                     OMDParser parser = new OMDParser();
                     try

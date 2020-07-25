@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ByteReader;
+using LanguageExt;
 using onmov200.model;
 
 namespace onmov200.parser
@@ -29,11 +30,17 @@ namespace onmov200.parser
 
         
         
-        public List<WayPoint> Parse(Stream stream, DateTime startTime)
+        public Either<List<WayPoint>,OMError> Parse(ActivityHeader activity, Stream stream)
         {
+            DateTime startTime = activity.DateTime;
             long length = stream.Length;
             long frameCount = length / CHUNK_SIZE;
-
+            long remainder = length % CHUNK_SIZE;
+            if (remainder != 0)
+            {
+                return new OMError(activity,"corrupted activity file : bad length");
+            }
+            
             List<WayPoint> points = new List<WayPoint>();
             
             for (int i = 0; i < frameCount; i++)
@@ -44,6 +51,10 @@ namespace onmov200.parser
                 int dataId = stream.ReadByte();
                 stream.Position = currentPosition;
                 // get schema
+                if (!Schemas.ContainsKey(dataId))
+                {
+                    return new OMError(activity,$"bad data id for chunk #{i}");
+                }
                 Schema schema = Schemas[dataId];
                 // read schema
                 var data = schema.Read(stream);

@@ -24,20 +24,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101   
-    - name: set environment variables
-      uses: allenevans/set-env@v1.0.0
-      with:
-          TESTS_PATH: './FormulaeTests'
-          PUBLISH_NUGET: true
-          RUN_TESTS: true
-          MAIN_CSPROJ: 'formulae/formulae.csproj'
-          COVERAGE_EXCLUDES: '[program]*'
-    - name: Printenv
-      run: |
-          echo "publichs=${PUBLISH_NUGET}"
-          echo "main=${MAIN_CSPROJ}"
-          printenv  
+        dotnet-version: 3.1.101       
     - name: Build with dotnet 
       run: dotnet build --configuration Release 
     - name: publish with dotnet    

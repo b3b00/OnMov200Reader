@@ -70,10 +70,22 @@ namespace OnMov200UI.ViewModels
                 Directory = OnMov200.OutputDirectory
             };
             var folder = await  openFolderDialog.ShowAsync(w as MainWindow);
-            foreach (var activityModel in toExtract)
+
+            var result = toExtract.Select(activityModel => OnMov200.ExtractActivity(activityModel.Activity, folder));
+            
+            var errors = result.Where(x => x.IsRight).Select(x => x.IfLeft(new OMError(null,"no error"))).ToList();
+            if (errors.Count == 0)
             {
-                OnMov200.ExtractActivity(activityModel.Activity, folder);
+                await MessageBoxManager
+                    .GetMessageBoxStandardWindow("extraction", "Les activités ont été extraites avec succés.", ButtonEnum.Ok, Icon.Info).Show();
             }
+            else
+            {
+                var errorsMessage = string.Join('\n',errors.Select(x =>x.ErrorMessage));
+                await MessageBoxManager
+                    .GetMessageBoxStandardWindow("Erreurs", errorsMessage, ButtonEnum.Ok, Icon.Error).Show();
+            }
+          
         }
 
         public async Task UpdateFastFix()
@@ -85,7 +97,7 @@ namespace OnMov200UI.ViewModels
             else
             {
                 var answer = await MessageBoxManager
-                    .GetMessageBoxStandardWindow("mise à jour du FastFix", "êtes vous sûr de vouloir forcer la mise à jour du FastFix ? ", ButtonEnum.YesNo, Icon.Plus).Show();
+                    .GetMessageBoxStandardWindow("mise à jour du FastFix", "êtes vous sûr de vouloir forcer la mise à jour du FastFix ? ", ButtonEnum.YesNo, Icon.Warning).Show();
                 if (answer == ButtonResult.Yes)
                 {
                     await OnMov200.UpDateFastFixIfNeeded(true);

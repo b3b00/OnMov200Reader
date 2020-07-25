@@ -1,6 +1,7 @@
 ﻿using System;
 using CommandLine;
 using onmov200;
+using System.Linq;
 
 
 namespace program
@@ -24,14 +25,34 @@ namespace program
             {
                 if (index >= 1 && index <= activities.Count)
                 {
-                    onMov200.ExtractActivity(activities[index-1]);
+                    var result = onMov200.ExtractActivity(activities[index-1]);
+                    if (result.IsRight)
+                    {
+                        var error = result.IfLeft(() => new OMError(null, "no error"));
+                        Console.WriteLine(error.ErrorMessage);
+                    }
+                    else
+                    {
+                        Console.WriteLine("OK.");
+                    }
                 }
             }
             else
             {
                 if (which == "all")
                 {
-                    onMov200.ExtractAll(activities);
+                    var result = onMov200.ExtractAll(activities);
+                    
+                    var errors = result.Where(x => x.IsRight).Select(x => x.IfLeft(new OMError(null,"no error"))).ToList();
+                    if (errors.Count == 0)
+                    {
+                        Console.WriteLine("OK.");
+                    }
+                    else
+                    {
+                        var errorsMessage = string.Join('\n',errors.Select(x =>x.ErrorMessage));
+                        Console.WriteLine(errorsMessage);
+                    }
                 }
             }
         }

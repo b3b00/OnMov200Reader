@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Program", "Program\Program.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnMov200UI", "OnMov200UI\OnMov200UI.csproj", "{0A54C5EF-AA40-47B3-A793-AA7DD03BB269}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnMov200WebApi", "OnMov200WebApi\OnMov200WebApi.csproj", "{7055BD91-3CCA-4C19-BC90-53F8EBB1DDB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{0A54C5EF-AA40-47B3-A793-AA7DD03BB269}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A54C5EF-AA40-47B3-A793-AA7DD03BB269}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A54C5EF-AA40-47B3-A793-AA7DD03BB269}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7055BD91-3CCA-4C19-BC90-53F8EBB1DDB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7055BD91-3CCA-4C19-BC90-53F8EBB1DDB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7055BD91-3CCA-4C19-BC90-53F8EBB1DDB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7055BD91-3CCA-4C19-BC90-53F8EBB1DDB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

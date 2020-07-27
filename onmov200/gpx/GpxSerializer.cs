@@ -7,6 +7,29 @@ namespace onmov200.gpx
 {
     public class GpxSerializer
     {
+
+        public static string Serialize(List<WayPoint> wayPoints)
+        {
+            StringWriter writer = null;
+            using (writer = new StringWriter())
+            {
+                writer.WriteLine(@"
+<?xml version=""1.0"" encoding=""utf-8""?>
+<gpx creator=""olivier"" version=""1.0"">
+<trk>
+<trkseg>");
+                foreach (var wayPoint in wayPoints)
+                {
+                    writer.WriteLine(WayPointXML(wayPoint));
+                }
+                writer.WriteLine(@"</trkseg>
+</trk>
+</gpx>");
+            }
+
+            return writer?.ToString();
+        }
+        
         public static void Serialize(List<WayPoint> wayPoints, string fileName)
         {
             using (var stream = File.OpenWrite(fileName))

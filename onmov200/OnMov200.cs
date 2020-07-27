@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
-using System.IO.Pipes;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using LanguageExt;
@@ -30,11 +26,15 @@ namespace onmov200
 
         public const string EpoFileName = "epo.7";
 
-        private string DataRoot => Path.Combine(RootDirectory, DataDirName);
+        public const string HeaderExtension = "OMH";
 
-        private string EpoFile => Path.Combine(RootDirectory, EpoFileName);
+        public const string DataExtension = "OMD";
 
-        private string CustomSettingFile => Path.Combine(RootDirectory, CustomSettingsFileName);
+        private string DataRoot => RootDirectory != null ? Path.Combine(RootDirectory, DataDirName) : DataDirName;
+
+        private string EpoFile => RootDirectory != null ? Path.Combine(RootDirectory, EpoFileName) : EpoFileName;
+
+        private string CustomSettingFile => RootDirectory != null ? Path.Combine(RootDirectory, CustomSettingsFileName) : CustomSettingFile;
 
         public string RootDirectory { get; private set; }
 
@@ -86,6 +86,13 @@ namespace onmov200
             return directory;
         }
 
+
+        public OnMov200()
+        {
+            OutputDirectory = null;
+            RootDirectory = null;
+        }
+        
         public OnMov200(string outputDirectory)
         {
             DetectDevice();
@@ -129,13 +136,13 @@ namespace onmov200
 
         public List<ActivityHeader> GetHeaders()
         {
-            var files = Directory.GetFiles(DataRoot, "*.OMH");
+            var files = Directory.GetFiles(DataRoot, $"*.{HeaderExtension}");
             var headers = new List<ActivityHeader>();
 
             foreach (var file in files)
             {
                 FileInfo headerFile = new FileInfo(file);
-                if (File.Exists(headerFile.FullName.Replace("OMH", "OMD")))
+                if (File.Exists(headerFile.FullName.Replace(HeaderExtension, DataExtension)))
                 {
                     var header = GetHeader(new FileInfo(file));
                     headers.Add(header);
@@ -145,6 +152,8 @@ namespace onmov200
             return headers;
         }
 
+
+      
 
         public List<Either<Unit,OMError>> ExtractAll(List<ActivityHeader> activities)
         {
@@ -178,51 +187,70 @@ namespace onmov200
 
             return results;
         }
-
-        private ActivityHeader GetHeader(FileInfo file)
+        
+        public ActivityHeader GetHeader(string name, Stream stream)
         {
             Dictionary<string, object> omh;
-            using (var stream = File.Open(file.FullName, FileMode.Open, FileAccess.Read))
+            using (stream)
             {
                 omh = OnMov200Schemas.OMH.Read(stream);
             }
 
-            var header = new ActivityHeader(omh, file.Name.Replace(".OMH", ""));
+            var header = new ActivityHeader(omh, name.Replace($".{HeaderExtension}", ""));
             return header;
+        }
+        
+
+        public ActivityHeader GetHeader(FileInfo file)
+        {
+            ActivityHeader header = null; 
+            using (var stream = File.Open(file.FullName, FileMode.Open, FileAccess.Read))
+            {
+                header = GetHeader(file.Name, stream);
+            }
+
+            return header;
+            // Dictionary<string, object> omh;
+            // using (var stream = File.Open(file.FullName, FileMode.Open, FileAccess.Read))
+            // {
+            //     omh = OnMov200Schemas.OMH.Read(stream);
+            // }
+            //
+            // var header = new ActivityHeader(omh, file.Name.Replace(".OMH", ""));
+            // return header;
         }
 
         private ActivityHeader GetHeader(string omhName)
         {
-            FileInfo file = new FileInfo(Path.Combine(DataRoot, omhName + ".OMH"));
+            FileInfo file = new FileInfo(Path.Combine(DataRoot, omhName + $".{HeaderExtension}"));
 
             return GetHeader(file);
         }
 
-        public Either<Unit,OMError> ExtractActivity(ActivityHeader activity, string outputDirectory = null)
+
+        public Either<(ActivityHeader activity, string gpx),OMError> ToGpx(ActivityHeader activity, Stream omdStream)
         {
             if (activity != null)
             {
                 string name = activity.DateTime.ToString("yyyyMmddhhmm");
 
-                using (var stream = File.Open(Path.Combine(DataRoot, $"{activity.Name}.OMD"), FileMode.Open,
-                    FileAccess.Read))
+                using (omdStream)
                 {
                     OMDParser parser = new OMDParser();
                     try
                     {
-                        var datas = parser.Parse(activity, stream);
+                        var datas = parser.Parse(activity, omdStream);
                         if (datas.IsRight)
                         {
                             return datas.IfLeft(() => new OMError(activity, "no error"));
                         }
                         if (datas.IsLeft && datas.Any())
                         {
-                            GpxSerializer.Serialize(datas.IfRight(() =>
-                                {
-                                     return new List<WayPoint>();
-                                }),
-                                Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx"));
-                            return new Unit();
+                            string gpx = GpxSerializer.Serialize(datas.IfRight(() =>
+                            {
+                                return new List<WayPoint>();
+                            }));
+                            return (activity,gpx);
                         }
                     }
                     catch (Exception e)
@@ -231,7 +259,38 @@ namespace onmov200
                     }
                 }
             }
-            return new Unit();
+            return new OMError(activity,"no activity provided");
+        }
+
+        public Either<Unit, OMError> ExtractActivity(ActivityHeader activity, string outputDirectory = null)
+        {
+            if (activity != null)
+            {
+                string name = activity.DateTime.ToString("yyyyMmddhhmm");
+
+                using (var stream = File.Open(Path.Combine(DataRoot, $"{activity.Name}.OMD"), FileMode.Open,
+                    FileAccess.Read))
+                {
+                    var result = ToGpx(activity, stream);
+
+
+                    if (result.IsLeft)
+                    {
+                        var res = result.IfRight(x => (activity, "empty"));
+                        string filename = Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx");
+                        File.WriteAllText(filename, res.gpx);
+                        return new Unit();
+                    }
+                    else
+                    {
+                        var res = result.IfLeft(() => new OMError(activity, "no error."));
+                        return res;
+                    }
+                }
+
+
+            }
+            return new OMError(activity,"no activity provided.");
         }
 
 

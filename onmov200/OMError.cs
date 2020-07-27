@@ -14,7 +14,7 @@ namespace onmov200
 
         public string Message1 => Message;
 
-        public string ErrorMessage => $"{Activity} [{Activity.Name}] : {Message}"; 
+        public string ErrorMessage => activity == null ? Message : $"{Activity} [{Activity.Name}] : {Message}"; 
 
         public OMError(ActivityHeader activity, string message)
         {

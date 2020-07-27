@@ -33,7 +33,8 @@ namespace program
                     }
                     else
                     {
-                        Console.WriteLine("OK.");
+                         
+                        Console.WriteLine($"OK. File extracted in {onMov200.OutputDirectory}");
                     }
                 }
             }
@@ -46,7 +47,8 @@ namespace program
                     var errors = result.Where(x => x.IsRight).Select(x => x.IfLeft(new OMError(null,"no error"))).ToList();
                     if (errors.Count == 0)
                     {
-                        Console.WriteLine("OK.");
+                        
+                        Console.WriteLine($"OK. files extracted in {onMov200.OutputDirectory}");
                     }
                     else
                     {

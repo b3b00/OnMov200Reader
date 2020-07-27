@@ -20,21 +20,24 @@ namespace OnMov200WebApi
         {
             return "activities controller is working";
         }
-        
-        
-        
+
+
+
         [HttpPost("/activities/upload")]
         public async Task<IActionResult> Upload()
         {
             var files = HttpContext.Request.Form.Files.ToList();
             var onmov = new OnMov200();
-            var validFiles = files.Where(f => f.FileName.EndsWith(OnMov200.HeaderExtension) || f.FileName.EndsWith(OnMov200.DataExtension));
+            var validFiles = files.Where(f =>
+                f.FileName.EndsWith(OnMov200.HeaderExtension) || f.FileName.EndsWith(OnMov200.DataExtension));
             if (validFiles.Count() % 2 != 0)
             {
                 return BadRequest("even file number expected");
             }
-            
+
             var groupedActivitiesFiles = validFiles.GroupBy(f => f.NameWithoutExtension()).ToList();
+
+            var extracted = new Dictionary<ActivityHeader, string>();
 
             foreach (var activityFiles in groupedActivitiesFiles)
             {
@@ -59,52 +62,89 @@ namespace OnMov200WebApi
                                 if (result.IsLeft)
                                 {
                                     var res = result.IfRight(() => (header, null));
-                                    var memStream = new MemoryStream();
-
-                                    using (var writer = new StringWriter())
-                                    {
-                                        await writer.WriteAsync(res.gpx);
-                                    }
-
-                                    //}
-                                    if (memStream.CanSeek)
-                                    {
-                                        memStream.Position = 0;
-                                    }
-
-                                    var encoding = Encoding.UTF8;
-                                    var bytes = encoding.GetBytes(res.gpx);
-
-                                    return File(bytes, "application/gpx+xml", res.activity.GpxFileName);
+                                    extracted[res.activity] = res.gpx;
                                 }
                                 else
                                 {
-                                    var error = result.IfLeft(() => new OMError(header, "no error"));
-                                    return BadRequest(error.ErrorMessage);
+                                    if (groupedActivitiesFiles.Count == 1)
+                                    {
+                                        var error = result.IfLeft(() => new OMError(header, "no error"));
+                                        return BadRequest(error.ErrorMessage);
+                                    }
                                 }
                             }
 
                         }
                         else
                         {
-                            return BadRequest("unable to find data file.");
+                            if (groupedActivitiesFiles.Count == 1)
+                            {
+                                return BadRequest("unable to find data file.");
+                            }
                         }
                     }
                     else
                     {
-                        return BadRequest($"{headerFile.FileName} : bad header file");
+                        if (groupedActivitiesFiles.Count == 1)
+                        {
+                            return BadRequest($"{headerFile.FileName} : bad header file");
+                        }
                     }
-                    
+
                 }
                 else
                 {
-                    return BadRequest("unable to find header file");
+                    if (groupedActivitiesFiles.Count == 1)
+                    {
+                        return BadRequest("unable to find header file");
+                    }
                 }
             }
-            
+
+            if (extracted.Count > 1)
+            {
+                var encoding = Encoding.UTF8;
+                var bytes = ZipActivities(extracted);
+                
+                return File(bytes, "application/zip", "gpx.zip");
+            }
+            else if (extracted.Count == 1)
+            {
+                var gpx = extracted.First();
+                var bytes = Encoding.UTF8.GetBytes(gpx.Value);
+                return File(bytes, "application/gpx+xml", gpx.Key.GpxFileName);
+            }
+
+
+
             // build a FileStreamResult
-            return Ok("coming soon");
-            
+            return Ok($"extracted == {extracted.Count}");
+
+        }
+
+
+        private byte[] ZipActivities(Dictionary<ActivityHeader, string> activities)
+        {
+            MemoryStream zipStream = new MemoryStream();
+
+            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
+            {
+                foreach (var activity in activities)
+                {
+                    ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Key.GpxFileName);
+                    using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
+                    {
+                        writer.Write(activity.Value);
+                    }    
+                }
+            }
+
+            if (zipStream.CanSeek)
+            {
+                zipStream.Position = 0;
+            }
+
+            return zipStream.ToArray();
         }
 
     }

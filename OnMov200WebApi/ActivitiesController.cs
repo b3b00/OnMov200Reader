@@ -38,7 +38,10 @@ namespace OnMov200WebApi
 
             var groupedActivitiesFiles = validFiles.GroupBy(f => f.NameWithoutExtension()).ToList();
 
+            int countOk = 0;
             var extracted = new Dictionary<ActivityHeader, string>();
+            int countKo = 0;
+            var errors = new Dictionary<string,string>();
 
             foreach (var activityFiles in groupedActivitiesFiles)
             {
@@ -64,13 +67,19 @@ namespace OnMov200WebApi
                                 {
                                     var res = result.IfRight(() => (header, null));
                                     extracted[res.activity] = res.gpx;
+                                    countOk++;
                                 }
                                 else
                                 {
+                                    countKo++;
+                                    var error = result.IfLeft(() => new OMError(header, "no error"));
                                     if (groupedActivitiesFiles.Count == 1)
                                     {
-                                        var error = result.IfLeft(() => new OMError(header, "no error"));
                                         return BadRequest(error.ErrorMessage);
+                                    }
+                                    else
+                                    {
+                                        errors[header.Name] = error.ErrorMessage;
                                     }
                                 }
                             }
@@ -78,74 +87,103 @@ namespace OnMov200WebApi
                         }
                         else
                         {
+                            countKo++;
                             if (groupedActivitiesFiles.Count == 1)
                             {
                                 return BadRequest("unable to find data file.");
+                            }
+                            else
+                            {
+                                errors[header.Name] = "data file not found";
+                                countKo++;
                             }
                         }
                     }
                     else
                     {
+                        countKo++;
                         if (groupedActivitiesFiles.Count == 1)
                         {
                             return BadRequest($"{headerFile.FileName} : bad header file");
+                        }
+                        else
+                        {
+                            errors[header.Name] = $"{headerFile.FileName} : bad header file";
+                            countKo++;
                         }
                     }
 
                 }
                 else
                 {
+                    countKo++;
                     if (groupedActivitiesFiles.Count == 1)
                     {
                         return BadRequest("unable to find header file");
                     }
+                    else
+                    {
+                        errors[activityFiles.Key] = $"{headerFile.FileName} : unable to find header file";
+                    }
                 }
             }
 
-            if (extracted.Count > 1)
-            {
-                var encoding = Encoding.UTF8;
-                var bytes = ZipActivities(extracted);
-                
-                return File(bytes, "application/zip", "gpx.zip");
-            }
-            else if (extracted.Count == 1)
-            {
-                var gpx = extracted.First();
-                var bytes = Encoding.UTF8.GetBytes(gpx.Value);
-                return File(bytes, "application/gpx+xml", gpx.Key.GpxFileName);
-            }
 
 
 
-            // build a FileStreamResult
-            return Ok($"extracted == {extracted.Count}");
+            var returnValue = ZipActivities(extracted, errors);
+            return File(returnValue.bytes, returnValue.mimeType, returnValue.name);
+            
 
         }
 
 
-        private byte[] ZipActivities(Dictionary<ActivityHeader, string> activities)
+        private (byte[] bytes, string mimeType, string name) ZipActivities(Dictionary<ActivityHeader, string> extracted, Dictionary<string,string> errors)
         {
-            MemoryStream zipStream = new MemoryStream();
-
-            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
+            if (extracted.Count + errors.Count > 1)
             {
-                foreach (var activity in activities)
+
+                MemoryStream zipStream = new MemoryStream();
+
+                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
                 {
-                    ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Key.GpxFileName);
-                    using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
+                    foreach (var activity in extracted)
                     {
-                        writer.Write(activity.Value);
-                    }    
+                        ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Key.GpxFileName);
+                        using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
+                        {
+                            writer.Write(activity.Value);
+                        }
+                    }
+
+                    foreach (var error in errors)
+                    {
+                        ZipArchiveEntry gpxEntry = archive.CreateEntry(error.Key+".error.log");
+                        using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
+                        {
+                            writer.Write(error.Value);
+                        }
+                    }
+                }
+
+                if (zipStream.CanSeek)
+                {
+                    zipStream.Position = 0;
+                }
+
+                return (zipStream.ToArray(),"application/zip","gpx.zip");
+            }
+            else
+            {
+                if (extracted.Count == 1)
+                {
+                    var gpx = extracted.First();
+                    var bytes = Encoding.UTF8.GetBytes(gpx.Value);
+                    return (bytes,"application/gpx+xml",gpx.Key.GpxFileName);
                 }
             }
 
-            if (zipStream.CanSeek)
-            {
-                zipStream.Position = 0;
-            }
-
-            return zipStream.ToArray();
+            return (new byte[]{}, "text/plain", "no.txt");
         }
 
     }

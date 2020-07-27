@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using onmov200;
 using onmov200.model;
@@ -21,19 +22,40 @@ namespace OnMov200WebApi
         {
             return "activities controller is working";
         }
+        
+        [HttpGet("/activities/dl/{id}")]
+        public async Task<IActionResult> GetActivity(string id)
+        {
+            var (activity,content) = ActivityStorage.getContent(id);
+            var summaries = new List<ExtractionSummary>();
+            var sum = new ExtractionSummary(activity,id);
+            summaries.Add(sum);
+            var returnValue = ZipActivities(summaries);
+            return File(returnValue.bytes, returnValue.mimeType, returnValue.name);
+            ;
+            return Ok();
+        }
+        
 
-
-
-        [HttpPost("/activities/upload")]
-        public async Task<IActionResult> Upload()
+        [HttpPost("/activities/sumup")]
+        public async Task<List<ExtractionSummary>> SumUp()
         {
             var files = HttpContext.Request.Form.Files.ToList();
+            var summaries = ProcessActivities(files);
+            return summaries;
+        }
+
+
+        private List<ExtractionSummary> ProcessActivities(List<IFormFile> files)
+        {
+            List<ExtractionSummary> summary = new List<ExtractionSummary>();
+            
             var onmov = new OnMov200();
             var validFiles = files.Where(f =>
                 f.FileName.EndsWith(OnMov200.HeaderExtension) || f.FileName.EndsWith(OnMov200.DataExtension));
             if (validFiles.Count() % 2 != 0)
             {
-                return BadRequest("even file number expected");
+                throw new Exception("even file number expected");
             }
 
             var groupedActivitiesFiles = validFiles.GroupBy(f => f.NameWithoutExtension()).ToList();
@@ -67,76 +89,119 @@ namespace OnMov200WebApi
                                 {
                                     var res = result.IfRight(() => (header, null));
                                     extracted[res.activity] = res.gpx;
+                                    string id = ActivityStorage.AddContent(res.activity,res.gpx);
+                                    var sum = new ExtractionSummary(res.activity, id);
+                                    summary.Add(sum);
                                     countOk++;
                                 }
                                 else
                                 {
                                     countKo++;
                                     var error = result.IfLeft(() => new OMError(header, "no error"));
-                                    if (groupedActivitiesFiles.Count == 1)
-                                    {
-                                        return BadRequest(error.ErrorMessage);
-                                    }
-                                    else
-                                    {
-                                        errors[header.Name] = error.ErrorMessage;
-                                    }
+
+                                    var sum = new ExtractionSummary(header.Name, error.ErrorMessage);
+                                    summary.Add(sum);
+
                                 }
                             }
-
                         }
                         else
                         {
                             countKo++;
-                            if (groupedActivitiesFiles.Count == 1)
-                            {
-                                return BadRequest("unable to find data file.");
-                            }
-                            else
-                            {
-                                errors[header.Name] = "data file not found";
-                                countKo++;
-                            }
+                            
+                            var sum = new ExtractionSummary(header.Name, "unable to find data file.");
+                            summary.Add(sum);
                         }
                     }
                     else
                     {
                         countKo++;
-                        if (groupedActivitiesFiles.Count == 1)
-                        {
-                            return BadRequest($"{headerFile.FileName} : bad header file");
-                        }
-                        else
-                        {
-                            errors[header.Name] = $"{headerFile.FileName} : bad header file";
-                            countKo++;
-                        }
+
+                        var sum = new ExtractionSummary(header.Name, " bad header file.");
+                        summary.Add(sum);
+
                     }
 
                 }
                 else
                 {
                     countKo++;
-                    if (groupedActivitiesFiles.Count == 1)
-                    {
-                        return BadRequest("unable to find header file");
-                    }
-                    else
-                    {
-                        errors[activityFiles.Key] = $"{headerFile.FileName} : unable to find header file";
-                    }
+                    var sum = new ExtractionSummary(activityFiles.Key, " unable to find header file.");
+                    
                 }
             }
-
-
-
-
-            var returnValue = ZipActivities(extracted, errors);
-            return File(returnValue.bytes, returnValue.mimeType, returnValue.name);
             
+            
+            
+            return summary;
+        }
+
+
+        [HttpPost("/activities/upload")]
+        public async Task<IActionResult> Upload()
+        {
+            var files = HttpContext.Request.Form.Files.ToList();
+
+
+            var summaries = ProcessActivities(files);
+
+            var returnValue = ZipActivities(summaries);
+            return File(returnValue.bytes, returnValue.mimeType, returnValue.name);
 
         }
 
+        
+        private (byte[] bytes, string mimeType, string name) ZipActivities(List<ExtractionSummary> summary)
+        {
+            if (summary.Count > 1)
+            {
+
+                MemoryStream zipStream = new MemoryStream();
+
+                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
+                {
+                    foreach (var activity in summary)
+                    {
+                        if (activity.Ok)
+                        {
+                            ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Activity.GpxFileName);
+                            using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
+                            {
+                                writer.Write(ActivityStorage.getContent(activity.Id));
+                            }
+                        }
+                        else
+                        {
+                            ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Name + ".error.log");
+                            using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
+                            {
+                                writer.Write(activity.Summary);
+                            }
+                        }
+                    }
+                }
+
+                if (zipStream.CanSeek)
+                {
+                    zipStream.Position = 0;
+                }
+
+                return (zipStream.ToArray(),"application/zip","gpx.zip");
+            }
+            else
+            {
+                if (summary.Count == 1)
+                {
+                    var gpx = summary.First();
+                    var (activity,content) = ActivityStorage.getContent(gpx.Id);
+                    var bytes = Encoding.UTF8.GetBytes(content);
+                    return (bytes,"application/gpx+xml",gpx.Activity.GpxFileName);
+                }
+            }
+
+            return (new byte[]{}, "text/plain", "no.txt");
+        }
+        
 
         private (byte[] bytes, string mimeType, string name) ZipActivities(Dictionary<ActivityHeader, string> extracted, Dictionary<string,string> errors)
         {

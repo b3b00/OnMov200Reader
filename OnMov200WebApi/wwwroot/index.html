@@ -4,14 +4,78 @@
 <head>
   
   <script>
-    async function changeFiles(event) {
-      const f = event.target;
-      if (f !== null && f !== undefined) {
-        tests.importTests(f.files);
+     function buildTag(tagName, attributes) {
+      let tag = document.createElement(tagName);
+
+      if (
+              attributes !== null &&
+              attributes !== undefined &&
+              attributes.length > 0
+      ) {
+        attributes.forEach(attribute => {
+          let attr = document.createAttribute(attribute.name);
+          attr.value = attribute.value;
+          tag.setAttributeNode(attr);
+        });
       }
+      return tag;
     }
-    window.changeFiles = changeFiles;
-    document.querySelector("#filer").addEventListener("change", changeFiles);
+
+     function buildTagWithText(tagName, attributes, text) {
+      let node = buildTag(tagName, attributes);
+      var t = document.createTextNode(text);
+      node.appendChild(t);
+      return node;
+    }
+
+     function buildTagIn(parent, tagName, attributes) {
+      var input = buildTag(tagName, attributes);
+      parent.appendChild(input);
+      return input;
+    }
+
+     function buildTagWithTextIn(parent, tagName, attributes, text) {
+      var input = buildTagWithText(tagName, attributes, text);
+      parent.appendChild(input);
+      return input;
+    }
+    
+    
+    async function sumup(event) {
+      var files = document.querySelector("#filer");
+      console.log(files.files);
+
+      let formData = new FormData();
+
+      for (let i = 0; i < files.files.length; i++) {        
+        formData.append("file[]", files.files[i]);
+      }      
+      let res = await fetch('/activities/sumup', {          
+          method: "POST",
+          body: formData});
+      let json = await res.json();
+      console.log(json);
+      
+      var activities = document.querySelector("#activities");
+      for(let i = 0; i < json.length;i++) {
+        row(json[i],activities);
+      }
+    }    
+    
+    
+    function row(summary, table) {
+      var tr = buildTagIn(table,"tr");
+      if (summary.ok) {
+       var td = buildTagIn(tr,"td");
+        let a = buildTagWithTextIn(td,"a",[{"name":"href","value":`/activities/dl/${summary.id}`}],summary.name);
+      }
+      else {
+        var td = buildTagWithTextIn(tr,"td",[],summary.name);  
+      }
+      buildTagWithTextIn(tr,"td",[],summary.summary);      
+    }
+    
+    
   </script>
 </head>
 <body>
@@ -22,13 +86,19 @@
 
 <a href="https://s3-eu-west-1.amazonaws.com/ephemeris/epo.7">t&eacute;lecharger fichier epo.7</a>
 
-<h2>export GPX</h2>
+<h2>Export GPX</h2>
 
 <form method="POST" action="/activities/upload" enctype = "multipart/form-data" >
   <label for="filer">S&eacute;lectionner les fichiers:</label>
   <input type="file" id="filer" name="filer" multiple><br><br>
-  <input type="submit">
+  <br>
+  <input type="submit" value="tout t&eacute;l&eacute;charger">
+  <br>
+  <input type="button" onclick="sumup();" value = "voir"/>
 </form>
+
+<table id="activities"></table>
+       
 
 </body>
 </html>

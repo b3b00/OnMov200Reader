@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  
+  <script>
+    async function changeFiles(event) {
+      const f = event.target;
+      if (f !== null && f !== undefined) {
+        tests.importTests(f.files);
+      }
+    }
+    window.changeFiles = changeFiles;
+    document.querySelector("#filer").addEventListener("change", changeFiles);
+  </script>
+</head>
+<body>
+
+<h1>The input multiple attribute</h1>
+
+<p>Try selecting more than one file when browsing for files.</p>
+
+<form method="POST" action="/activities/upload" enctype = "multipart/form-data" >
+  <label for="files">Select files:</label>
+  <input type="file" id="filer" name="filer" multiple><br><br>
+  <input type="submit">
+</form>
+
+</body>
+</html>

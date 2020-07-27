@@ -75,8 +75,7 @@ namespace OnMov200WebApi
                                     var encoding = Encoding.UTF8;
                                     var bytes = encoding.GetBytes(res.gpx);
 
-                                    string gpxname = res.activity.DateTime.ToString("yyyyMmddhhmm");
-                                    return File(bytes, "application/gpx+xml", gpxname + ".gpx");
+                                    return File(bytes, "application/gpx+xml", res.activity.GpxFileName);
                                 }
                                 else
                                 {

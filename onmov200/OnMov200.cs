@@ -232,7 +232,7 @@ namespace onmov200
         {
             if (activity != null)
             {
-                string name = activity.DateTime.ToString("yyyyMmddhhmm");
+                
 
                 using (omdStream)
                 {
@@ -266,7 +266,7 @@ namespace onmov200
         {
             if (activity != null)
             {
-                string name = activity.DateTime.ToString("yyyyMmddhhmm");
+                string gpxFileName = activity.GpxFileName;
 
                 using (var stream = File.Open(Path.Combine(DataRoot, $"{activity.Name}.OMD"), FileMode.Open,
                     FileAccess.Read))
@@ -277,7 +277,7 @@ namespace onmov200
                     if (result.IsLeft)
                     {
                         var res = result.IfRight(x => (activity, "empty"));
-                        string filename = Path.Combine(outputDirectory ?? OutputDirectory, $"{name}.gpx");
+                        string filename = Path.Combine(outputDirectory ?? OutputDirectory, gpxFileName);
                         File.WriteAllText(filename, res.gpx);
                         return new Unit();
                     }

@@ -67,13 +67,19 @@
       var tr = buildTagIn(table,"tr");
       if (summary.ok) {
        var td = buildTagIn(tr,"td");
-        let a = buildTagWithTextIn(td,"a",[{"name":"href","value":`/activities/dl/${summary.id}`}],summary.name);
+
+        const blob = new Blob([summary.gpx], { type: "application/gpx+xml" });
+        const url = URL.createObjectURL(blob);
+       
+        let a = buildTagWithTextIn(td,"a",[{"name":"href","value":url},{"name":"download","value":summary.activity.gpxFileName}],summary.name);
       }
       else {
         var td = buildTagWithTextIn(tr,"td",[],summary.name);  
       }
       buildTagWithTextIn(tr,"td",[],summary.summary);      
     }
+    
+    
     
     
   </script>
@@ -90,11 +96,9 @@
 
 <form method="POST" action="/activities/upload" enctype = "multipart/form-data" >
   <label for="filer">S&eacute;lectionner les fichiers:</label>
-  <input type="file" id="filer" name="filer" multiple><br><br>
+  <input type="file" id="filer" name="filer" multiple><br><br>  
   <br>
-  <input type="submit" value="tout t&eacute;l&eacute;charger">
-  <br>
-  <input type="button" onclick="sumup();" value = "voir"/>
+  <input type="button" onclick="sumup();" value = "charger"/>
 </form>
 
 <table id="activities"></table>

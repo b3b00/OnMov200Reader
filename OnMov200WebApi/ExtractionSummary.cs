@@ -18,13 +18,14 @@ namespace OnMov200WebApi
             Summary = failure;
         }
 
-        public ExtractionSummary(ActivityHeader activity, string id)
+        public ExtractionSummary(ActivityHeader activity, string id, string gpx)
         {
             Ok = true;
             Summary = activity.ToString();
             Name = activity.Name;
             Id = id;
             Activity = activity;
+            Gpx = gpx;
         }
         
         [JsonProperty("name")]
@@ -38,6 +39,9 @@ namespace OnMov200WebApi
         
         [JsonProperty("id")]
         public string Id { get; set; }
+        
+        [JsonProperty("gpx")]
+        public string Gpx { get; set; }
         
         [JsonIgnore]
         public ActivityHeader Activity { get; set; }

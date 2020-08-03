@@ -23,19 +23,8 @@ namespace OnMov200WebApi
             return "activities controller is working";
         }
         
-        [HttpGet("/activities/dl/{id}")]
-        public async Task<IActionResult> GetActivity(string id)
-        {
-            var (activity,content) = ActivityStorage.getContent(id);
-            var summaries = new List<ExtractionSummary>();
-            var sum = new ExtractionSummary(activity,id);
-            summaries.Add(sum);
-            var returnValue = ZipActivities(summaries);
-            return File(returnValue.bytes, returnValue.mimeType, returnValue.name);
-            ;
-            return Ok();
-        }
         
+            
 
         [HttpPost("/activities/sumup")]
         public async Task<List<ExtractionSummary>> SumUp()
@@ -90,7 +79,7 @@ namespace OnMov200WebApi
                                     var res = result.IfRight(() => (header, null));
                                     extracted[res.activity] = res.gpx;
                                     string id = ActivityStorage.AddContent(res.activity,res.gpx);
-                                    var sum = new ExtractionSummary(res.activity, id);
+                                    var sum = new ExtractionSummary(res.activity, id,res.gpx);
                                     summary.Add(sum);
                                     countOk++;
                                 }

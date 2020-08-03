@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,15 +13,7 @@ namespace OnMov200WebApi
     public class ActivitiesController : Controller
     {
 
-
-        [HttpGet("/activities/say")]
-        public string Say()
-        {
-            return "activities controller is working";
-        }
-        
-        
-            
+     
 
         [HttpPost("/activities/sumup")]
         public async Task<List<ExtractionSummary>> SumUp()
@@ -78,8 +67,7 @@ namespace OnMov200WebApi
                                 {
                                     var res = result.IfRight(() => (header, null));
                                     extracted[res.activity] = res.gpx;
-                                    string id = ActivityStorage.AddContent(res.activity,res.gpx);
-                                    var sum = new ExtractionSummary(res.activity, id,res.gpx);
+                                    var sum = new ExtractionSummary(res.activity, res.gpx);
                                     summary.Add(sum);
                                     countOk++;
                                 }
@@ -126,119 +114,13 @@ namespace OnMov200WebApi
         }
 
 
-        [HttpPost("/activities/upload")]
-        public async Task<IActionResult> Upload()
-        {
-            var files = HttpContext.Request.Form.Files.ToList();
-
-
-            var summaries = ProcessActivities(files);
-
-            var returnValue = ZipActivities(summaries);
-            return File(returnValue.bytes, returnValue.mimeType, returnValue.name);
-
-        }
+       
 
         
-        private (byte[] bytes, string mimeType, string name) ZipActivities(List<ExtractionSummary> summary)
-        {
-            if (summary.Count > 1)
-            {
-
-                MemoryStream zipStream = new MemoryStream();
-
-                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
-                {
-                    foreach (var activity in summary)
-                    {
-                        if (activity.Ok)
-                        {
-                            ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Activity.GpxFileName);
-                            using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
-                            {
-                                writer.Write(ActivityStorage.getContent(activity.Id));
-                            }
-                        }
-                        else
-                        {
-                            ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Name + ".error.log");
-                            using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
-                            {
-                                writer.Write(activity.Summary);
-                            }
-                        }
-                    }
-                }
-
-                if (zipStream.CanSeek)
-                {
-                    zipStream.Position = 0;
-                }
-
-                return (zipStream.ToArray(),"application/zip","gpx.zip");
-            }
-            else
-            {
-                if (summary.Count == 1)
-                {
-                    var gpx = summary.First();
-                    var (activity,content) = ActivityStorage.getContent(gpx.Id);
-                    var bytes = Encoding.UTF8.GetBytes(content);
-                    return (bytes,"application/gpx+xml",gpx.Activity.GpxFileName);
-                }
-            }
-
-            return (new byte[]{}, "text/plain", "no.txt");
-        }
+        
         
 
-        private (byte[] bytes, string mimeType, string name) ZipActivities(Dictionary<ActivityHeader, string> extracted, Dictionary<string,string> errors)
-        {
-            if (extracted.Count + errors.Count > 1)
-            {
-
-                MemoryStream zipStream = new MemoryStream();
-
-                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
-                {
-                    foreach (var activity in extracted)
-                    {
-                        ZipArchiveEntry gpxEntry = archive.CreateEntry(activity.Key.GpxFileName);
-                        using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
-                        {
-                            writer.Write(activity.Value);
-                        }
-                    }
-
-                    foreach (var error in errors)
-                    {
-                        ZipArchiveEntry gpxEntry = archive.CreateEntry(error.Key+".error.log");
-                        using (StreamWriter writer = new StreamWriter(gpxEntry.Open()))
-                        {
-                            writer.Write(error.Value);
-                        }
-                    }
-                }
-
-                if (zipStream.CanSeek)
-                {
-                    zipStream.Position = 0;
-                }
-
-                return (zipStream.ToArray(),"application/zip","gpx.zip");
-            }
-            else
-            {
-                if (extracted.Count == 1)
-                {
-                    var gpx = extracted.First();
-                    var bytes = Encoding.UTF8.GetBytes(gpx.Value);
-                    return (bytes,"application/gpx+xml",gpx.Key.GpxFileName);
-                }
-            }
-
-            return (new byte[]{}, "text/plain", "no.txt");
-        }
+        
 
     }
 }

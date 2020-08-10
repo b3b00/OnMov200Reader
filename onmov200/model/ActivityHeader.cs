@@ -6,7 +6,7 @@ namespace onmov200.model
     public class ActivityHeader
     {
         
-        public string GpxFileName => DateTime.ToString("yyyyMmddhhmm")+".gpx";
+        public string GpxFileName => DateTime.ToString("yyyyMMddhhmm")+".gpx";
         
         public long Distance { get; set; }
         

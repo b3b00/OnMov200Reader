@@ -25,10 +25,14 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101       
-    - name: Build with dotnet 
+    - name: Build with dotnet      
       run: dotnet build --configuration Release 
-    - name: publish with dotnet    
-      run: dotnet publish --configuration Release
+    - name: publish with dotnet  Win10 x64
+      if: matrix.os == 'windows-latest'  
+      run: dotnet publish --configuration Release -f netcoreapp3.0 -r win10-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true
+    - name: publish with dotnet  linux x64
+      if: matrix.os == 'ubuntu-latest'  
+      run: dotnet publish --configuration Release -f netcoreapp3.0 -r linux-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true
     - name: Upload linux UI Artifact
       if: matrix.os == 'ubuntu-latest' 
       uses: actions/upload-artifact@v2

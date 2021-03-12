@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
 using onmov200;
 using onmov200.Models;
@@ -23,8 +24,18 @@ namespace OnMov200UI.ViewModels
 
         public MainWindowViewModel(Database db)
         {
+            var cmdLine = Environment.GetCommandLineArgs();
+            string rootDirectory = null;
+            if (cmdLine.Length == 2)
+            {
+                if (Directory.Exists(cmdLine[1]))
+                {
+                    rootDirectory = cmdLine[1];
+                }
+            }
+            
             Database = db;
-            string root =  db.OnMov200.Detect(6);
+            string root =  db.OnMov200.Detect(6,rootDirectory);
             if (root != null) {
                 db.OnMov200.Initialize(root);
                 Content = new ActivityListViewModel(db.GetActivities());

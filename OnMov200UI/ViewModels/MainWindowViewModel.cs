@@ -43,24 +43,30 @@ namespace OnMov200UI.ViewModels
             }
         }
 
+        public void Update()
+        {
+            this.RaisePropertyChanged("FastFixLabel");
+        }
+
         public ActivityListViewModel Activities => Content as ActivityListViewModel;
 
         public string FastFixLabel
         {
             get
             {
-                if (OnMov200.NeedFastFixUpdate())
+                var need = OnMov200.NeedFastFixUpdate(); 
+                if (need.needUpdate)
                 {
-                    return "Mise à jour du FastFix.";
+                    return $"Mise à jour du FastFix nécessaire - {need.age} jours";
                 }
                 else
                 {
-                    return "Fastfix OK";
+                    return $"Fastfix OK - {need.age} jours";
                 }
             }
         }
 
-        public bool NeedFastFix => OnMov200.NeedFastFixUpdate();
+        public bool NeedFastFix => OnMov200.NeedFastFixUpdate().needUpdate;
 
         public async Task ExtractActivities(object w)
         {
@@ -101,6 +107,7 @@ namespace OnMov200UI.ViewModels
                 if (answer == ButtonResult.Yes)
                 {
                     await OnMov200.UpDateFastFixIfNeeded(true);
+                    Update();
                 }
                     
             }

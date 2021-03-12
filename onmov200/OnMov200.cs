@@ -65,9 +65,9 @@ namespace onmov200
             }
         }
 
-        public string Detect(int tries)
+        public string Detect(int tries, string directory = null)
         {
-            string directory = null;
+            //string directory = null;
             int i = 0;
             while (i < tries && directory == null)
             {
@@ -304,7 +304,7 @@ namespace onmov200
 
         public async Task UpDateFastFixIfNeeded(bool force = false)
         {
-            if (force || NeedFastFixUpdate())
+            if (force || NeedFastFixUpdate().needUpdate)
             {
                 try
                 {
@@ -341,7 +341,7 @@ namespace onmov200
             await WriteCustomSettings();
         }
 
-        public bool NeedFastFixUpdate()
+        public (bool needUpdate,long age) NeedFastFixUpdate()
         {
             var now = DateTime.UtcNow;
             long milliseconds = new DateTimeOffset(now).ToUnixTimeMilliseconds();
@@ -353,10 +353,10 @@ namespace onmov200
 
                 bool tooLong = diff > maxMillis;
 
-                return tooLong;
+                return (tooLong,(diff/60/60/1000/24));
             }
 
-            return true;
+            return (true,9999);
         }
 
         private CustomSettings DefaultSettings()

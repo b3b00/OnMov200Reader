@@ -16,6 +16,13 @@ namespace OnMov200UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        private const string FastFixTitle = "FastFix";
+        private const string ConfirmFastFixUpdate = "êtes vous sûr de vouloir forcer la mise à jour du FastFix ? ";
+        private const string UpdatedFastFix = "Les données du FastFix ont été mises à jour.";
+        private const string ExtractedData = "Les activités ont été extraites avec succés.";
+        private const string ExtractionTitle = "Extraction";
+        private const string ErrorTitle = "Erreurs";
+        
         ViewModelBase content;
 
         private Database Database;
@@ -79,14 +86,14 @@ namespace OnMov200UI.ViewModels
 
         public bool NeedFastFix => OnMov200.NeedFastFixUpdate().needUpdate;
 
-        public async Task ExtractActivities(object w)
+        public async Task ExtractActivities(object window)
         {
             var toExtract = Activities.Activities.Where(x => x.Checked).ToList();
             OpenFolderDialog openFolderDialog = new OpenFolderDialog()
             {
                 Directory = OnMov200.OutputDirectory
             };
-            var folder = await  openFolderDialog.ShowAsync(w as MainWindow);
+            var folder = await  openFolderDialog.ShowAsync(window as MainWindow);
 
             var result = toExtract.Select(activityModel => OnMov200.ExtractActivity(activityModel.Activity, folder));
             
@@ -94,13 +101,13 @@ namespace OnMov200UI.ViewModels
             if (errors.Count == 0)
             {
                 await MessageBoxManager
-                    .GetMessageBoxStandardWindow("extraction", "Les activités ont été extraites avec succés.", ButtonEnum.Ok, Icon.Info).Show();
+                    .GetMessageBoxStandardWindow(ExtractionTitle, ExtractedData, ButtonEnum.Ok, Icon.Info).Show();
             }
             else
             {
                 var errorsMessage = string.Join('\n',errors.Select(x =>x.ErrorMessage));
                 await MessageBoxManager
-                    .GetMessageBoxStandardWindow("Erreurs", errorsMessage, ButtonEnum.Ok, Icon.Error).Show();
+                    .GetMessageBoxStandardWindow(ErrorTitle, errorsMessage, ButtonEnum.Ok, Icon.Error).Show();
             }
           
         }
@@ -110,14 +117,18 @@ namespace OnMov200UI.ViewModels
             if (NeedFastFix)
             {
                 await OnMov200.UpDateFastFixIfNeeded();
+                await MessageBoxManager
+                    .GetMessageBoxStandardWindow(FastFixTitle, UpdatedFastFix, ButtonEnum.Ok, Icon.Info).Show();
             }
             else
             {
                 var answer = await MessageBoxManager
-                    .GetMessageBoxStandardWindow("mise à jour du FastFix", "êtes vous sûr de vouloir forcer la mise à jour du FastFix ? ", ButtonEnum.YesNo, Icon.Warning).Show();
+                    .GetMessageBoxStandardWindow(FastFixTitle, ConfirmFastFixUpdate, ButtonEnum.YesNo, Icon.Warning).Show();
                 if (answer == ButtonResult.Yes)
                 {
-                    await OnMov200.UpDateFastFixIfNeeded(true);
+                    await OnMov200.UpDateFastFixIfNeeded(true);                   
+                    await MessageBoxManager
+                        .GetMessageBoxStandardWindow(FastFixTitle, UpdatedFastFix, ButtonEnum.Ok, Icon.None).Show();
                     Update();
                 }
                     

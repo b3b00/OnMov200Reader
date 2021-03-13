@@ -12,7 +12,7 @@ namespace OnMov200UI.ViewModels
             Activities = new ObservableCollection<ActivityModel>(activities);
         }
 
-        public bool HasSelectedActivities => Activities.FirstOrDefault(x => x.Checked) != null;
+        public bool HasSelectedActivities => Activities.Any(x => x.Checked) ;
 
         public ObservableCollection<ActivityModel> Activities { get; }
 

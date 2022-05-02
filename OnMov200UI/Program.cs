@@ -1,7 +1,6 @@
-﻿using System;
+﻿
 using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Logging.Serilog;
+//using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
 
 namespace OnMov200UI
